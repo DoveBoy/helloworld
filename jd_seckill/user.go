@@ -25,7 +25,7 @@ func NewUser(client *httpc.HttpClient,conf *conf.Config) *User {
 
 func (this *User) loginPage() {
 	req:=httpc.NewRequest(this.client)
-	req.SetHeader("User-Agent",this.conf.Read("config","DEFAULT_USER_AGENT"))
+	req.SetHeader("User-Agent",this.conf.Read("config","default_user_agent"))
 	req.SetHeader("Connection","keep-alive")
 	req.SetHeader("Accept","text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3")
 	_,_,_=req.SetUrl("https://passport.jd.com/new/login.aspx").SetMethod("get").Send().End()
@@ -36,7 +36,7 @@ func (this *User) QrLogin() (string,error) {
 	this.loginPage()
 	//二维码登录
 	req:=httpc.NewRequest(this.client)
-	req.SetHeader("User-Agent",this.conf.Read("config","DEFAULT_USER_AGENT"))
+	req.SetHeader("User-Agent",this.conf.Read("config","default_user_agent"))
 	req.SetHeader("Referer","https://passport.jd.com/new/login.aspx")
 	resp,err:=req.SetUrl("https://qr.m.jd.com/show?appid=133&size=300&t="+strconv.Itoa(int(time.Now().Unix()*1000))).SetMethod("get").Send().EndFile("./","qr_code.png")
 	if err!=nil || resp.StatusCode!=http.StatusOK {
@@ -59,7 +59,7 @@ func (this *User) QrLogin() (string,error) {
 
 func (this *User) QrcodeTicket(wlfstkSmdl string) (string,error) {
 	req:=httpc.NewRequest(this.client)
-	req.SetHeader("User-Agent",this.conf.Read("config","DEFAULT_USER_AGENT"))
+	req.SetHeader("User-Agent",this.conf.Read("config","default_user_agent"))
 	req.SetHeader("Referer","https://passport.jd.com/new/login.aspx")
 	resp,body,err:=req.SetUrl("https://qr.m.jd.com/check?appid=133&callback=jQuery"+strconv.Itoa(common.Rand(1000000,9999999))+"&token="+wlfstkSmdl+"&_="+strconv.Itoa(int(time.Now().Unix()*1000))).SetMethod("get").Send().End()
 	if err!=nil || resp.StatusCode!=http.StatusOK {
@@ -76,7 +76,7 @@ func (this *User) QrcodeTicket(wlfstkSmdl string) (string,error) {
 
 func (this *User) TicketInfo(ticket string) (string,error) {
 	req:=httpc.NewRequest(this.client)
-	req.SetHeader("User-Agent",this.conf.Read("config","DEFAULT_USER_AGENT"))
+	req.SetHeader("User-Agent",this.conf.Read("config","default_user_agent"))
 	req.SetHeader("Referer","https://passport.jd.com/uc/login?ltype=logout")
 	resp,body,err:=req.SetUrl("https://passport.jd.com/uc/qrCodeTicketValidation?t="+ticket).SetMethod("get").Send().End()
 	if err!=nil || resp.StatusCode!=http.StatusOK {
@@ -94,7 +94,7 @@ func (this *User) TicketInfo(ticket string) (string,error) {
 
 func (this *User) RefreshStatus() error {
 	req:=httpc.NewRequest(this.client)
-	req.SetHeader("User-Agent",this.conf.Read("config","DEFAULT_USER_AGENT"))
+	req.SetHeader("User-Agent",this.conf.Read("config","default_user_agent"))
 	resp,_,err:=req.SetUrl("https://order.jd.com/center/list.action?rid="+strconv.Itoa(int(time.Now().Unix()*1000))).SetMethod("get").Send().End()
 	if err==nil && resp.StatusCode==http.StatusOK {
 		return nil
@@ -105,14 +105,23 @@ func (this *User) RefreshStatus() error {
 
 func (this *User) GetUserInfo() (string,error) {
 	req:=httpc.NewRequest(this.client)
-	req.SetHeader("User-Agent",this.conf.Read("config","DEFAULT_USER_AGENT"))
+	req.SetHeader("User-Agent",this.conf.Read("config","default_user_agent"))
 	req.SetHeader("Referer","https://order.jd.com/center/list.action")
-	resp,body,err:=req.SetUrl("https://passport.jd.com/user/petName/getUserInfoForMiniJd.action?callback="+strconv.Itoa(common.Rand(1000000,9999999))+"&_="+strconv.Itoa(int(time.Now().Unix()*1000))).SetMethod("get").Send().End()
-	if err!=nil || resp.StatusCode!=http.StatusOK {
-		log.Println("获取用户信息失败")
-		return "",errors.New("获取用户信息失败")
-	}else{
-		b,_:=common.GbkToUtf8([]byte(gjson.Get(body,"nickName").String()))
-		return string(b), nil
+	errorCount:=5
+	nickName:=""
+	for  {
+		if errorCount>0 {
+			_,body,_:=req.SetUrl("https://passport.jd.com/user/petName/getUserInfoForMiniJd.action?callback="+strconv.Itoa(common.Rand(1000000,9999999))+"&_="+strconv.Itoa(int(time.Now().Unix()*1000))).SetMethod("get").Send().End()
+			if gjson.Get(body,"nickName").Exists() {
+				nickName=gjson.Get(body,"nickName").String()
+				break
+			}
+			errorCount=errorCount-1
+			time.Sleep(3*time.Millisecond)
+		}else{
+			break
+		}
 	}
+	b,_:=common.GbkToUtf8([]byte(nickName))
+	return string(b), nil
 }
