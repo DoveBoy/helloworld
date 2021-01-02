@@ -78,7 +78,7 @@ func (this *Seckill) getSeckillUrl() (string,error) {
 			break
 		}
 		log.Println("抢购链接获取失败，稍后自动重试")
-		time.Sleep(3*time.Millisecond)
+		time.Sleep(300*time.Millisecond)
 	}
 	//https://divide.jd.com/user_routing?skuId=8654289&sn=c3f4ececd8461f0e4d7267e96a91e0e0&from=pc
 	url=strings.ReplaceAll(url,"divide","marathon")
@@ -158,14 +158,12 @@ func (this *Seckill) SubmitSeckillOrder() bool {
 	invoiceContentType:="-1"
 	invoicePhone:=""
 	invoicePhoneKey:=""
+	invoiceInfo:="false"
 	if isinvoiceInfo {
 		invoiceTitle=gjson.Get(initInfo,"invoiceInfo.invoiceTitle").String()
 		invoiceContentType=gjson.Get(initInfo,"invoiceInfo.invoiceContentType").String()
 		invoicePhone=gjson.Get(initInfo,"invoiceInfo.invoicePhone").String()
 		invoicePhoneKey=gjson.Get(initInfo,"invoiceInfo.invoicePhoneKey").String()
-	}
-	invoiceInfo:="false"
-	if isinvoiceInfo {
 		invoiceInfo="true"
 	}
 	token:=gjson.Get(initInfo,"token").String()

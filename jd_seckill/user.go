@@ -121,7 +121,7 @@ func (this *User) GetUserInfo() (string,error) {
 				break
 			}
 			errorCount=errorCount-1
-			time.Sleep(3*time.Millisecond)
+			time.Sleep(300*time.Millisecond)
 		}else{
 			break
 		}
