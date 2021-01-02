@@ -1,7 +1,7 @@
 package service
 
 import (
-	"../conf"
+	"github.com/ztino/jd_seckill/conf"
 	"gopkg.in/gomail.v2"
 	"strconv"
 )

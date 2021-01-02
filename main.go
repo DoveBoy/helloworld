@@ -1,13 +1,13 @@
 package main
 
 import (
-	"./common"
-	"./conf"
-	"./jd_seckill"
 	"errors"
 	"fmt"
 	"github.com/Albert-Zhan/httpc"
 	"github.com/tidwall/gjson"
+	"github.com/ztino/jd_seckill/common"
+	"github.com/ztino/jd_seckill/conf"
+	"github.com/ztino/jd_seckill/jd_seckill"
 	"log"
 	"net/http"
 	"os"

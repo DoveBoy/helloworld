@@ -1,14 +1,14 @@
 package jd_seckill
 
 import (
-	"../common"
-	"../conf"
-	"../service"
 	"errors"
 	"fmt"
 	"github.com/Albert-Zhan/httpc"
 	"github.com/PuerkitoBio/goquery"
 	"github.com/tidwall/gjson"
+	"github.com/ztino/jd_seckill/common"
+	"github.com/ztino/jd_seckill/conf"
+	"github.com/ztino/jd_seckill/service"
 	"log"
 	"net/http"
 	"strconv"
