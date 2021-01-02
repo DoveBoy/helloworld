@@ -5,8 +5,7 @@ import (
 	"fmt"
 	"github.com/Albert-Zhan/httpc"
 	"github.com/tidwall/gjson"
-	"github.com/ztino/jd_seckill/common"
-	"github.com/ztino/jd_seckill/conf"
+	"github.com/unknwon/goconfig"
 	"github.com/ztino/jd_seckill/jd_seckill"
 	"log"
 	"net/http"
@@ -20,7 +19,7 @@ var client *httpc.HttpClient
 
 var cookieJar *httpc.CookieJar
 
-var config *conf.Config
+var config *goconfig.ConfigFile
 
 var wg *sync.WaitGroup
 
@@ -32,14 +31,14 @@ func init()  {
 	client.SetRedirect(func(req *http.Request, via []*http.Request) error {
 		return http.ErrUseLastResponse
 	})
+
 	//配置文件初始化
 	confFile:="./conf.ini"
-	if !common.Exists(confFile) {
+	var err error
+	if config,err=goconfig.LoadConfigFile(confFile);err!=nil {
 		log.Println("配置文件不存在，程序退出")
 		os.Exit(0)
 	}
-	config=&conf.Config{}
-	config.InitConfig(confFile)
 
 	wg=new(sync.WaitGroup)
 	wg.Add(1)
@@ -75,7 +74,7 @@ func main()  {
 			//等待抢购/开始抢购
 			nowLocalTime:=time.Now().UnixNano()/1e6
 			jdTime,_:=getJdTime()
-			buyDate:=config.Read("config","buy_time")
+			buyDate:=config.MustValue("config","buy_time","")
 			loc, _ := time.LoadLocation("Local")
 			t,_:=time.ParseInLocation("2006-01-02 15:04:05",buyDate,loc)
 			buyTime:=t.UnixNano()/1e6

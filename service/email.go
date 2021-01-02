@@ -1,7 +1,7 @@
 package service
 
 import (
-	"github.com/ztino/jd_seckill/conf"
+	"github.com/unknwon/goconfig"
 	"gopkg.in/gomail.v2"
 	"strconv"
 )
@@ -13,11 +13,11 @@ type Email struct {
 	pass string
 }
 
-func NerEmail(conf *conf.Config) *Email {
-	host:=conf.Read("smtp","email_host")
-	port:=conf.Read("smtp","port")
-	user:=conf.Read("smtp","email_user")
-	pass:=conf.Read("smtp","email_pwd")
+func NerEmail(conf *goconfig.ConfigFile) *Email {
+	host:=conf.MustValue("smtp","email_host","")
+	port:=conf.MustValue("smtp","port","")
+	user:=conf.MustValue("smtp","email_user","")
+	pass:=conf.MustValue("smtp","email_pwd","")
 	return &Email{host: host,port: port,user: user,pass: pass}
 }
 
