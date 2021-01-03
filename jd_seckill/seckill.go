@@ -43,6 +43,9 @@ func (this *Seckill) SkuTitle() (string,error) {
 }
 
 func (this *Seckill) MakeReserve() {
+	user:=NewUser(this.client,this.conf)
+	userInfo,_:=user.GetUserInfo()
+	log.Println("用户:"+userInfo)
 	shopTitle,err:=this.SkuTitle()
 	if err!=nil {
 		log.Println("获取商品信息失败")
