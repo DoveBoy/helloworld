@@ -14,6 +14,12 @@ Jd_Seckill
 go get github.com/ztino/jd_seckill
 ```
 
+## 待办
+
+- 日志目前还未输出到本地日志文件保存
+- 自动化抢购支持，无需设置抢购时间
+- 跨平台桌面端支持，打算使用：https://github.com/therecipe/qt
+
 ## 使用
 
 > [下载](https://github.com/ztino/jd_seckill/releases) 对应平台的可执行文件，解压，终端进入该目录。
@@ -29,6 +35,7 @@ jd_seckill login
 ### 自动获取eif,fp
 
 > ⚠依赖谷歌浏览器，请安装谷歌浏览器，获取到的eid和fp请手动填入配置文件
+
 执行以下命令按照提示操作:
 ```shell
 jd_seckill jdTdudfp
