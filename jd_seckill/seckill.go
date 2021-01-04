@@ -79,7 +79,8 @@ func (this *Seckill) getSeckillUrl() (string, error) {
 		_, body, _ := req.Send().End()
 		//临时打印数据
 		log.Println("返回信息:"+body)
-		var cbBody string
+		//先注释,测试过gjson可以解析jQuery1153906({"type":"3","state":"13","url":""})格式
+/*		var cbBody string
 		cbBody = body
 		spBody := strings.Split(body, "(")
 		if len(spBody) >= 2 {
@@ -88,6 +89,10 @@ func (this *Seckill) getSeckillUrl() (string, error) {
 
 		if gjson.Get(cbBody, "url").Exists() && gjson.Get(cbBody, "url").String() != "" {
 			url = gjson.Get(cbBody, "url").String()
+			break
+		}*/
+		if gjson.Get(body, "url").Exists() && gjson.Get(body, "url").String() != "" {
+			url = gjson.Get(body, "url").String()
 			break
 		}
 		log.Println("抢购链接获取失败，稍后自动重试")
@@ -115,7 +120,12 @@ func (this *Seckill) RequestSeckillUrl() {
 	url, _ := this.getSeckillUrl()
 	skuId := this.conf.MustValue("config", "sku_id", "")
 	log.Println("访问商品的抢购连接...")
-	req := httpc.NewRequest(this.client)
+	client:=httpc.NewHttpClient()
+	client.SetCookieJar(common.CookieJar)
+	client.SetRedirect(func(req *http.Request, via []*http.Request) error {
+		return http.ErrUseLastResponse
+	})
+	req := httpc.NewRequest(client)
 	req.SetHeader("User-Agent", this.getUserAgent())
 	req.SetHeader("Host", "marathon.jd.com")
 	req.SetHeader("Referer", fmt.Sprintf("https://item.jd.com/%s.html", skuId))
@@ -125,8 +135,13 @@ func (this *Seckill) RequestSeckillUrl() {
 func (this *Seckill) SeckillPage() {
 	log.Println("访问抢购订单结算页面...")
 	skuId := this.conf.MustValue("config", "sku_id", "")
-	seckillNum := this.conf.MustValue("config", "seckill_num", "")
-	req := httpc.NewRequest(this.client)
+	seckillNum := this.conf.MustValue("config", "seckill_num", "2")
+	client:=httpc.NewHttpClient()
+	client.SetCookieJar(common.CookieJar)
+	client.SetRedirect(func(req *http.Request, via []*http.Request) error {
+		return http.ErrUseLastResponse
+	})
+	req := httpc.NewRequest(client)
 	req.SetHeader("User-Agent", this.getUserAgent())
 	req.SetHeader("Host", "marathon.jd.com")
 	req.SetHeader("Referer", fmt.Sprintf("https://item.jd.com/%s.html", skuId))
@@ -136,7 +151,7 @@ func (this *Seckill) SeckillPage() {
 func (this *Seckill) SeckillInitInfo() (string, error) {
 	log.Println("获取秒杀初始化信息...")
 	skuId := this.conf.MustValue("config", "sku_id", "")
-	seckillNum := this.conf.MustValue("config", "seckill_num", "")
+	seckillNum := this.conf.MustValue("config", "seckill_num", "2")
 	req := httpc.NewRequest(this.client)
 	req.SetHeader("User-Agent", this.getUserAgent())
 	req.SetHeader("Host", "marathon.jd.com")
@@ -159,7 +174,7 @@ func (this *Seckill) SubmitSeckillOrder() bool {
 	eid := this.conf.MustValue("config", "eid", "")
 	fp := this.conf.MustValue("config", "fp", "")
 	skuId := this.conf.MustValue("config", "sku_id", "")
-	seckillNum := this.conf.MustValue("config", "seckill_num", "")
+	seckillNum := this.conf.MustValue("config", "seckill_num", "2")
 	paymentPwd := this.conf.MustValue("account", "payment_pwd", "")
 	initInfo, err := this.SeckillInitInfo()
 	if err != nil {

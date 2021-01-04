@@ -6,7 +6,6 @@ import (
 	"github.com/ztino/jd_seckill/cmd"
 	"github.com/ztino/jd_seckill/common"
 	"log"
-	"net/http"
 	"os"
 	"runtime"
 )
@@ -16,9 +15,6 @@ func init()  {
 	common.Client=httpc.NewHttpClient()
 	common.CookieJar=httpc.NewCookieJar()
 	common.Client.SetCookieJar(common.CookieJar)
-	common.Client.SetRedirect(func(req *http.Request, via []*http.Request) error {
-		return http.ErrUseLastResponse
-	})
 
 	//配置文件初始化
 	confFile:="./conf.ini"

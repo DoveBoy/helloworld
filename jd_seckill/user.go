@@ -97,7 +97,12 @@ func (this *User) TicketInfo(ticket string) (string,error) {
 }
 
 func (this *User) RefreshStatus() error {
-	req:=httpc.NewRequest(this.client)
+	client:=httpc.NewHttpClient()
+	client.SetCookieJar(common.CookieJar)
+	client.SetRedirect(func(req *http.Request, via []*http.Request) error {
+		return http.ErrUseLastResponse
+	})
+	req:=httpc.NewRequest(client)
 	req.SetHeader("User-Agent",this.getUserAgent())
 	resp,_,err:=req.SetUrl("https://order.jd.com/center/list.action?rid="+strconv.Itoa(int(time.Now().Unix()*1000))).SetMethod("get").Send().End()
 	if err==nil && resp.StatusCode==http.StatusOK {
