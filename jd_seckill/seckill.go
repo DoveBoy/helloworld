@@ -73,9 +73,12 @@ func (this *Seckill) getSeckillUrl() (string, error) {
 	req.SetHeader("User-Agent", this.getUserAgent())
 	req.SetHeader("Host", "itemko.jd.com")
 	req.SetHeader("Referer", fmt.Sprintf("https://item.jd.com/%s.html", skuId))
+	req.SetUrl("https://itemko.jd.com/itemShowBtn?callback=jQuery" + strconv.Itoa(common.Rand(1000000, 9999999)) + "&skuId=" + skuId + "&from=pc&_=" + strconv.Itoa(int(time.Now().Unix()*1000))).SetMethod("get")
 	url := ""
 	for {
-		_, body, _ := req.SetUrl("https://itemko.jd.com/itemShowBtn?callback=jQuery{}" + strconv.Itoa(common.Rand(1000000, 9999999)) + "&skuId=" + skuId + "&from=pc&_=" + strconv.Itoa(int(time.Now().Unix()*1000))).SetMethod("get").Send().End()
+		_, body, _ := req.Send().End()
+		//临时打印数据
+		log.Println("返回信息:"+body)
 		var cbBody string
 		cbBody = body
 		spBody := strings.Split(body, "(")
@@ -90,6 +93,7 @@ func (this *Seckill) getSeckillUrl() (string, error) {
 		log.Println("抢购链接获取失败，稍后自动重试")
 		time.Sleep(300 * time.Millisecond)
 	}
+	url = "https:"+url
 	//https://divide.jd.com/user_routing?skuId=8654289&sn=c3f4ececd8461f0e4d7267e96a91e0e0&from=pc
 	url = strings.ReplaceAll(url, "divide", "marathon")
 	//https://marathon.jd.com/captcha.html?skuId=8654289&sn=c3f4ececd8461f0e4d7267e96a91e0e0&from=pc
@@ -110,6 +114,7 @@ func (this *Seckill) RequestSeckillUrl() {
 	}
 	url, _ := this.getSeckillUrl()
 	skuId := this.conf.MustValue("config", "sku_id", "")
+	log.Println("访问商品的抢购连接...")
 	req := httpc.NewRequest(this.client)
 	req.SetHeader("User-Agent", this.getUserAgent())
 	req.SetHeader("Host", "marathon.jd.com")
