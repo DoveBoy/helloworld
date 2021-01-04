@@ -94,7 +94,7 @@ func startJdTdudfp(cmd *cobra.Command, args []string)  {
 			chromedp.WaitVisible(".common-submit-btn"),
 			chromedp.Click(".common-submit-btn"),
 			chromedp.WaitVisible("#sumPayPriceId"),
-			chromedp.Sleep(2*time.Second),
+			chromedp.Sleep(3*time.Second),
 			chromedp.Evaluate("_JdTdudfp", &res),
 		)
 		if err != nil {
@@ -102,7 +102,7 @@ func startJdTdudfp(cmd *cobra.Command, args []string)  {
 		}
 		value:=string(res)
 		if !gjson.Valid(value) {
-			log.Println("获取失败，请重新尝试")
+			log.Println("获取失败，请重新尝试，返回信息:"+value)
 		}else{
 			log.Println("获取成功，请手动填入配置文件")
 			log.Println("eid:"+gjson.Get(value,"eid").String())
