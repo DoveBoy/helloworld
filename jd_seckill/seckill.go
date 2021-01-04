@@ -76,9 +76,15 @@ func (this *Seckill) getSeckillUrl() (string, error) {
 	url := ""
 	for {
 		_, body, _ := req.SetUrl("https://itemko.jd.com/itemShowBtn?callback=jQuery{}" + strconv.Itoa(common.Rand(1000000, 9999999)) + "&skuId=" + skuId + "&from=pc&_=" + strconv.Itoa(int(time.Now().Unix()*1000))).SetMethod("get").Send().End()
-		urlbody := strings.Trim(strings.Split(body, "(")[1], ")")
-		if gjson.Get(urlbody, "url").Exists() && gjson.Get(urlbody, "url").String() != "" {
-			url = gjson.Get(urlbody, "url").String()
+		var cbBody string
+		cbBody = body
+		spBody := strings.Split(body, "(")
+		if len(spBody) >= 2 {
+			cbBody = strings.Trim(spBody[1], ")")
+		}
+
+		if gjson.Get(cbBody, "url").Exists() && gjson.Get(cbBody, "url").String() != "" {
+			url = gjson.Get(cbBody, "url").String()
 			break
 		}
 		log.Println("抢购链接获取失败，稍后自动重试")
