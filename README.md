@@ -10,6 +10,16 @@ Jd_Seckill
 
 ## 安装
 
+方式一(推荐):
+
+```shell
+git clone https://github.com/ztino/jd_seckill.git
+cd jd_seckill
+go get
+```
+
+方式二:
+
 ```shell
 go get github.com/ztino/jd_seckill
 ```
@@ -32,7 +42,7 @@ go get github.com/ztino/jd_seckill
 jd_seckill login
 ```
 
-### 自动获取eif,fp
+### 自动获取eid,fp
 
 > ⚠依赖谷歌浏览器，请安装谷歌浏览器，获取到的eid和fp请手动填入配置文件
 
@@ -40,7 +50,7 @@ jd_seckill login
 ```shell
 jd_seckill jdTdudfp
 ```
-> ⚠目前测试阶段，请勿依赖该功能
+> ⚠目前实验性阶段，请勿依赖该功能
 
 ### 预约
 执行以下命令按照提示操作:
