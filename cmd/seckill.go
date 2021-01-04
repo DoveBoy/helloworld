@@ -11,6 +11,7 @@ import (
 	"log"
 	"net/http"
 	"os"
+	"strconv"
 	"time"
 )
 
@@ -54,7 +55,10 @@ func startSeckill(cmd *cobra.Command, args []string)  {
 		seckill:=jd_seckill.NewSeckill(common.Client,common.Config)
 		//开启抢购任务,第二个参数为开启几个协程
 		//怕封号的可以减少协程数量,相反抢到的成功率也减低了
-		Start(seckill,5)
+		//抢购任务数读取配置文件
+		str:=common.Config.MustValue("config","task_num","5")
+		taskNum,_:=strconv.Atoi(str)
+		Start(seckill,taskNum)
 	}
 }
 
@@ -69,17 +73,22 @@ func GetJdTime() (int64,error) {
 }
 
 func Start(seckill *jd_seckill.Seckill,taskNum int)  {
-	seckillTotalTime:=time.Now().Add(2*time.Minute).Unix()
+	//抢购总时间读取配置文件
+	str:=common.Config.MustValue("config","seckill_time","2")
+	seckillTime,_:=strconv.Atoi(str)
+	seckillTotalTime:=time.Now().Add(time.Duration(seckillTime)*time.Minute).Unix()
+	//抢购间隔时间读取配置文件
+	str=common.Config.MustValue("config","ticker_time","1500")
+	tickerTime,_:=strconv.Atoi(str)
 	//开始检测抢购状态
 	go CheckSeckillStatus()
-	//抢购总时间两分钟,超时程序自动退出
+	//抢购总时间超时程序自动退出
 	for time.Now().Unix()<seckillTotalTime {
 		for i:=1;i<=taskNum;i++ {
 			go task(seckill)
 		}
-		//每隔1.5秒执行一次
 		//怕封号的可以增加间隔时间,相反抢到的成功率也减低了
-		time.Sleep(1500*time.Millisecond)
+		time.Sleep(time.Duration(tickerTime)*time.Millisecond)
 	}
 	log.Println("抢购结束，具体详情请查看日志")
 }
