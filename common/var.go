@@ -7,7 +7,7 @@ import (
 
 const SoftName = "jd_seckill"
 
-const Version = "0.1.6"
+const Version = "0.1.7"
 
 var Client *httpc.HttpClient
 
