@@ -5,9 +5,12 @@ import (
 	"github.com/unknwon/goconfig"
 )
 
-const SoftName = "jd_seckill"
-
-const Version = "0.1.7"
+const (
+	SoftName          = "jd_seckill"
+	Version           = "0.1.7"
+	DateTimeFormatStr = "2006-01-02 15:04:05"
+	DateFormatStr     = "2006-01-02"
+)
 
 var Client *httpc.HttpClient
 

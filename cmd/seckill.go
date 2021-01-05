@@ -35,21 +35,31 @@ func startSeckill(cmd *cobra.Command, args []string)  {
 		user:=jd_seckill.NewUser(common.Client,common.Config)
 		go KeepSession(user)
 		//计算抢购时间
-		nowLocalTime:=time.Now().UnixNano()/1e6
-		jdTime,_:=GetJdTime()
-		buyDate:=common.Config.MustValue("config","buy_time","")
-		loc, _ := time.LoadLocation("Local")
-		t,_:=time.ParseInLocation("2006-01-02 15:04:05",buyDate,loc)
-		buyTime:=t.UnixNano()/1e6
-		diffTime:=nowLocalTime-jdTime
-		log.Println(fmt.Sprintf("正在等待到达设定时间:%s，检测本地时间与京东服务器时间误差为【%d】毫秒",buyDate,diffTime))
-		timerTime:=(buyTime+diffTime)-jdTime
-		if timerTime<=0 {
-			log.Println("请设置抢购时间")
+		startTime, err := common.Hour2Unix(common.Config.MustValue("config", "buy_time", "09:59:59"))
+		if err != nil {
+			log.Fatal("抢购开始时间初始化失败，请检查时间格式", err)
+		}
+		if startTime.Unix() < time.Now().Unix() {
+			startTime = startTime.AddDate(0, 0, 1)
+		}
+		log.Println("抢购开始时间：", startTime)
+
+		localTime := time.Now().UnixNano() / 1e6
+		log.Println("本地系统时间：", localTime)
+		jdTime, _ := GetJdTime()
+		log.Println("京东云端时间：", jdTime)
+		diffTime := localTime - jdTime
+		log.Println(fmt.Sprintf("本地时间与京东服务器时间误差为【%d】毫秒", diffTime))
+
+		buyTime := startTime.UnixNano() / 1e6
+		timerTime := (buyTime + diffTime) - jdTime
+		if timerTime <= 0 {
+			log.Println("请设置抢购开始时间，或直接清空")
 			os.Exit(0)
 		}
 		//等待抢购
-		time.Sleep(time.Duration(timerTime)*time.Millisecond)
+		log.Println("等待抢购中……")
+		time.Sleep(time.Duration(timerTime) * time.Millisecond)
 		//开始抢购
 		log.Println("时间到达，开始执行……")
 		seckill:=jd_seckill.NewSeckill(common.Client,common.Config)
