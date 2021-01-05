@@ -2,12 +2,19 @@ package common
 
 import (
 	"bytes"
+	"errors"
+	"fmt"
+	"github.com/CodyGuo/win"
+	"github.com/makiuchi-d/gozxing"
+	"github.com/makiuchi-d/gozxing/qrcode"
+	goQrcode "github.com/skip2/go-qrcode"
 	"golang.org/x/text/encoding/simplifiedchinese"
 	"golang.org/x/text/transform"
+	"image"
 	"io/ioutil"
+	"log"
 	"math/rand"
 	"os"
-	"os/exec"
 	"runtime"
 	"strconv"
 	"time"
@@ -95,21 +102,40 @@ func Exists(path string) bool {
 	return true
 }
 
-func OpenImage(file string)  {
-	if runtime.GOOS=="windows" {
-		cmd:=exec.Command("start",file)
-		_=cmd.Start()
-	}else{
-		if runtime.GOOS=="linux" {
-			cmd:=exec.Command("eog",file)
-			_=cmd.Start()
-		}else{
-			cmd:=exec.Command("open",file)
-			_=cmd.Start()
+func OpenImage(qrPath string) {
+	if "windows" == runtime.GOOS { // Windows系统
+		cmd := "cmd /c rundll32.exe C:\\Windows\\System32\\shimgvw.dll,ImageView_Fullscreen " + qrPath
+		if err := ExecRun(cmd); err != nil {
+			log.Println(cmd)
+			log.Fatal(err)
 		}
+	} else { // 非Windows系统(Linux等)输出控制台
+		//解码二维码
+		file, _ := os.Open(qrPath)
+		img, _, _ := image.Decode(file)
+		bmp, _ := gozxing.NewBinaryBitmapFromImage(img)
+		qrReader := qrcode.NewQRCodeReader()
+		res, _ := qrReader.Decode(bmp, nil)
+
+		//输出控制台
+		qr, err := goQrcode.New(res.String(), goQrcode.High)
+		if err != nil {
+			log.Println("二维码获取成功，请打开图片用京东APP扫描")
+		}
+		fmt.Println(qr.ToSmallString(false))
 	}
 }
 
 func Hour2Unix(hour string) (time.Time, error) {
 	return time.ParseInLocation(DateTimeFormatStr, time.Now().Format(DateFormatStr) + " " + hour, time.Local)
+}
+
+func ExecRun(cmd string) error {
+	lpCmdLine := win.StringToBytePtr(cmd)
+	ret := win.WinExec(lpCmdLine, win.SW_HIDE)
+	if ret <= 31 {
+		return errors.New(winExecError[ret])
+
+	}
+	return nil
 }

@@ -19,3 +19,12 @@ var CookieJar *httpc.CookieJar
 var Config *goconfig.ConfigFile
 
 var SeckillStatus chan bool
+
+var (
+	winExecError = map[uint32]string{
+		0:  "The system is out of memory or resources.",
+		2:  "The .exe file is invalid.",
+		3:  "The specified file was not found.",
+		11: "The specified path was not found.",
+	}
+)

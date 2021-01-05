@@ -4,12 +4,15 @@ go 1.15
 
 require (
 	github.com/Albert-Zhan/httpc v0.0.0-20190712132051-aed72924b5e6
+	github.com/CodyGuo/win v0.0.0-20170113125346-08e6b7208274
 	github.com/PuerkitoBio/goquery v1.6.0
 	github.com/blinkbean/dingtalk v0.0.0-20201231030509-45a553a84503
 	github.com/chromedp/cdproto v0.0.0-20201204063249-be40c824ad18
 	github.com/chromedp/chromedp v0.5.4
 	github.com/gobwas/httphead v0.1.0 // indirect
 	github.com/json-iterator/go v1.1.10 // indirect
+	github.com/makiuchi-d/gozxing v0.0.0-20200903113411-25f730ed83da
+	github.com/skip2/go-qrcode v0.0.0-20200617195104-da1b6568686e
 	github.com/spf13/cobra v1.1.1
 	github.com/tidwall/gjson v1.6.7
 	github.com/unknwon/goconfig v0.0.0-20200908083735-df7de6a44db8
