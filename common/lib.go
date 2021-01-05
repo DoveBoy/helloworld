@@ -2,9 +2,7 @@ package common
 
 import (
 	"bytes"
-	"errors"
 	"fmt"
-	"github.com/CodyGuo/win"
 	"github.com/makiuchi-d/gozxing"
 	"github.com/makiuchi-d/gozxing/qrcode"
 	goQrcode "github.com/skip2/go-qrcode"
@@ -12,9 +10,9 @@ import (
 	"golang.org/x/text/transform"
 	"image"
 	"io/ioutil"
-	"log"
 	"math/rand"
 	"os"
+	"os/exec"
 	"runtime"
 	"strconv"
 	"time"
@@ -53,7 +51,7 @@ func Utf8ToGbk(s []byte) ([]byte, error) {
 }
 
 func NewRandStr(length int) string {
-	s:=[]string{
+	s := []string{
 		"a", "b", "c", "d", "e", "f",
 		"g", "h", "i", "j", "k", "l",
 		"m", "n", "o", "p", "q", "r",
@@ -64,20 +62,20 @@ func NewRandStr(length int) string {
 		"Q", "R", "S", "T", "U", "V",
 		"W", "X", "Y", "Z",
 	}
-	str:=""
-	for i:=1;i<=length;i++  {
+	str := ""
+	for i := 1; i <= length; i++ {
 		r := rand.New(rand.NewSource(time.Now().UnixNano()))
-		str+=s[r.Intn(len(s)-1)]
+		str += s[r.Intn(len(s)-1)]
 	}
 	return str
 }
 
-func Substr(s string,start,end int) string {
-	strRune:=[]rune(s)
-	if start==-1 {
+func Substr(s string, start, end int) string {
+	strRune := []rune(s)
+	if start == -1 {
 		return string(strRune[:end])
 	}
-	if end==-1 {
+	if end == -1 {
 		return string(strRune[start:])
 	}
 	return string(strRune[start:end])
@@ -103,39 +101,21 @@ func Exists(path string) bool {
 }
 
 func OpenImage(qrPath string) {
-	if "windows" == runtime.GOOS { // WindowsÏµÍ³
-		cmd := "cmd /c rundll32.exe C:\\Windows\\System32\\shimgvw.dll,ImageView_Fullscreen " + qrPath
-		if err := ExecRun(cmd); err != nil {
-			log.Println(cmd)
-			log.Fatal(err)
-		}
-	} else { // ·ÇWindowsÏµÍ³(LinuxµÈ)Êä³ö¿ØÖÆÌ¨
-		//½âÂë¶þÎ¬Âë
+	if runtime.GOOS == "windows" {//windows
+		cmd := exec.Command("cmd", "/k", "start", qrPath)
+		_ = cmd.Start()
+	}else if runtime.GOOS == "darwin" {//Macos
+		cmd := exec.Command("open", qrPath)
+		_ = cmd.Start()
+	}else{
+		//linuxæˆ–è€…å…¶ä»–ç³»ç»Ÿ
 		file, _ := os.Open(qrPath)
 		img, _, _ := image.Decode(file)
 		bmp, _ := gozxing.NewBinaryBitmapFromImage(img)
 		qrReader := qrcode.NewQRCodeReader()
 		res, _ := qrReader.Decode(bmp, nil)
-
-		//Êä³ö¿ØÖÆÌ¨
-		qr, err := goQrcode.New(res.String(), goQrcode.High)
-		if err != nil {
-			log.Println("¶þÎ¬Âë»ñÈ¡³É¹¦£¬Çë´ò¿ªÍ¼Æ¬ÓÃ¾©¶«APPÉ¨Ãè")
-		}
+		//è¾“å‡ºæŽ§åˆ¶å°
+		qr, _ := goQrcode.New(res.String(), goQrcode.High)
 		fmt.Println(qr.ToSmallString(false))
 	}
-}
-
-func Hour2Unix(hour string) (time.Time, error) {
-	return time.ParseInLocation(DateTimeFormatStr, time.Now().Format(DateFormatStr) + " " + hour, time.Local)
-}
-
-func ExecRun(cmd string) error {
-	lpCmdLine := win.StringToBytePtr(cmd)
-	ret := win.WinExec(lpCmdLine, win.SW_HIDE)
-	if ret <= 31 {
-		return errors.New(winExecError[ret])
-
-	}
-	return nil
 }
