@@ -1,7 +1,7 @@
 Jd_Seckill
 =======
 
-####还未收到安全通知，但是估计也快了，给大家建个Telegram群吧，茶余饭后，聊天扯淡，有条件的可以加入:https://t.me/joinchat/GsDnhtkdKJ4nbwJh
+#### 还未收到安全通知，但是估计也快了，给大家建个Telegram群吧，茶余饭后，聊天扯淡，有条件的可以加入：https://t.me/joinchat/GsDnhtkdKJ4nbwJh
 
 > ⚠ 此项目是[python jd_seckill](https://github.com/huanghyw/jd_seckill) 的go版本实现，旨在降低使用门栏和相互学习而创建。
 
