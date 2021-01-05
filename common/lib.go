@@ -2,8 +2,13 @@ package common
 
 import (
 	"bytes"
+	"fmt"
+	"github.com/makiuchi-d/gozxing"
+	"github.com/makiuchi-d/gozxing/qrcode"
+	goQrcode "github.com/skip2/go-qrcode"
 	"golang.org/x/text/encoding/simplifiedchinese"
 	"golang.org/x/text/transform"
+	"image"
 	"io/ioutil"
 	"math/rand"
 	"os"
@@ -95,17 +100,22 @@ func Exists(path string) bool {
 	return true
 }
 
-func OpenImage(file string) {
-	if runtime.GOOS == "windows" {
-		cmd := exec.Command("cmd", "/k", "start", file)
+func OpenImage(qrPath string) {
+	if runtime.GOOS == "windows" {//windows
+		cmd := exec.Command("cmd", "/k", "start", qrPath)
 		_ = cmd.Start()
-	} else {
-		if runtime.GOOS == "linux" {
-			cmd := exec.Command("eog", file)
-			_ = cmd.Start()
-		} else {
-			cmd := exec.Command("open", file)
-			_ = cmd.Start()
-		}
+	}else if runtime.GOOS == "darwin" {//Macos
+		cmd := exec.Command("open", qrPath)
+		_ = cmd.Start()
+	}else{
+		//linux或者其他系统
+		file, _ := os.Open(qrPath)
+		img, _, _ := image.Decode(file)
+		bmp, _ := gozxing.NewBinaryBitmapFromImage(img)
+		qrReader := qrcode.NewQRCodeReader()
+		res, _ := qrReader.Decode(bmp, nil)
+		//输出控制台
+		qr, _ := goQrcode.New(res.String(), goQrcode.High)
+		fmt.Println(qr.ToSmallString(false))
 	}
 }

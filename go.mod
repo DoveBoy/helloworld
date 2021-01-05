@@ -10,6 +10,8 @@ require (
 	github.com/chromedp/chromedp v0.5.4
 	github.com/gobwas/httphead v0.1.0 // indirect
 	github.com/json-iterator/go v1.1.10 // indirect
+	github.com/makiuchi-d/gozxing v0.0.0-20200903113411-25f730ed83da
+	github.com/skip2/go-qrcode v0.0.0-20200617195104-da1b6568686e
 	github.com/spf13/cobra v1.1.1
 	github.com/tidwall/gjson v1.6.7
 	github.com/unknwon/goconfig v0.0.0-20200908083735-df7de6a44db8

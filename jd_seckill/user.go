@@ -10,6 +10,7 @@ import (
 	"log"
 	"net/http"
 	"os"
+	"path/filepath"
 	"strconv"
 	"time"
 )
@@ -57,7 +58,8 @@ func (this *User) QrLogin() (string,error) {
 	}
 	log.Println("二维码获取成功，请打开京东APP扫描")
 	dir,_:=os.Getwd()
-	common.OpenImage(dir+"/qr_code.png")
+	qrPath := filepath.Join(dir, `./qr_code.png`)
+	common.OpenImage(qrPath)
 	return wlfstkSmdl,nil
 }
 
