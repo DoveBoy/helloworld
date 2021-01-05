@@ -63,7 +63,9 @@ func (this *Seckill) MakeReserve() {
 		reserveUrl := gjson.Get(body, "url").String()
 		req = httpc.NewRequest(this.client)
 		_, _, _ = req.SetUrl("https:" + reserveUrl).SetMethod("get").Send().End()
-		log.Println("预约成功，已获得抢购资格 / 您已成功预约过了，无需重复预约")
+		msg := "预约成功，已获得抢购资格 / 您已成功预约过了，无需重复预约！[我的预约](https://yushou.jd.com/member/qualificationList.action)"
+		_ = service.SendMessage(this.conf, "茅台抢购通知", msg)
+		log.Println(msg)
 	}
 }
 

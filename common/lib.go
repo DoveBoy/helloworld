@@ -109,3 +109,7 @@ func OpenImage(file string)  {
 		}
 	}
 }
+
+func Hour2Unix(hour string) (time.Time, error) {
+	return time.ParseInLocation(DateTimeFormatStr, time.Now().Format(DateFormatStr) + " " + hour, time.Local)
+}
