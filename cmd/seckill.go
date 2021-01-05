@@ -17,6 +17,7 @@ import (
 
 func init() {
 	rootCmd.AddCommand(seckillCmd)
+	seckillCmd.Flags().BoolP("run","r",false,"Run directly without waiting for the time to buy")
 }
 
 var seckillCmd = &cobra.Command{
@@ -26,6 +27,8 @@ var seckillCmd = &cobra.Command{
 }
 
 func startSeckill(cmd *cobra.Command, args []string)  {
+	//获取是否直接运行抢购
+	isRun,_:=cmd.Flags().GetBool("run")
 	session:=jd_seckill.NewSession(common.CookieJar)
 	err:=session.CheckLoginStatus()
 	if err!=nil {
@@ -34,24 +37,29 @@ func startSeckill(cmd *cobra.Command, args []string)  {
 		//活跃用户会话,当会话失效自动退出程序
 		user:=jd_seckill.NewUser(common.Client,common.Config)
 		go KeepSession(user)
-		//计算抢购时间
-		nowLocalTime:=time.Now().UnixNano()/1e6
-		jdTime,_:=GetJdTime()
-		buyDate:=common.Config.MustValue("config","buy_time","")
-		loc, _ := time.LoadLocation("Local")
-		t,_:=time.ParseInLocation("2006-01-02 15:04:05",buyDate,loc)
-		buyTime:=t.UnixNano()/1e6
-		diffTime:=nowLocalTime-jdTime
-		log.Println(fmt.Sprintf("正在等待到达设定时间:%s，检测本地时间与京东服务器时间误差为【%d】毫秒",buyDate,diffTime))
-		timerTime:=(buyTime+diffTime)-jdTime
-		if timerTime<=0 {
-			log.Println("请设置抢购时间")
-			os.Exit(0)
+		//直接运行抢购跳过等待抢购时间
+		if !isRun {
+			//计算抢购时间
+			nowLocalTime:=time.Now().UnixNano()/1e6
+			jdTime,_:=GetJdTime()
+			buyDate:=common.Config.MustValue("config","buy_time","")
+			loc, _ := time.LoadLocation("Local")
+			t,_:=time.ParseInLocation("2006-01-02 15:04:05",buyDate,loc)
+			buyTime:=t.UnixNano()/1e6
+			diffTime:=nowLocalTime-jdTime
+			log.Println(fmt.Sprintf("正在等待到达设定时间:%s，检测本地时间与京东服务器时间误差为【%d】毫秒",buyDate,diffTime))
+			timerTime:=(buyTime+diffTime)-jdTime
+			if timerTime<=0 {
+				log.Println("请设置抢购时间")
+				os.Exit(0)
+			}
+			//等待抢购
+			time.Sleep(time.Duration(timerTime)*time.Millisecond)
+			//开始抢购
+			log.Println("时间到达，开始执行……")
+		}else{
+			log.Println("开始执行……")
 		}
-		//等待抢购
-		time.Sleep(time.Duration(timerTime)*time.Millisecond)
-		//开始抢购
-		log.Println("时间到达，开始执行……")
 		seckill:=jd_seckill.NewSeckill(common.Client,common.Config)
 		//开启抢购任务,第二个参数为开启几个协程
 		//怕封号的可以减少协程数量,相反抢到的成功率也减低了
