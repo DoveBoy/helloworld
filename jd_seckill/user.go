@@ -141,8 +141,7 @@ func (this *User) GetUserInfo() (string,error) {
 func (this *User) DelQrCode() {
 	dir, _ := os.Getwd()
 	qrPath := filepath.Join(dir, `./qr_code.png`)
-	log.Println(qrPath)
-	if _, err := os.Stat(qrPath); !os.IsNotExist(err) {
-		os.Remove(qrPath)
+	if common.Exists(qrPath) {
+		_=os.Remove(qrPath)
 	}
 }

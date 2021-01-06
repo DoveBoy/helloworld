@@ -8,8 +8,8 @@ import (
 	"github.com/tidwall/gjson"
 	"github.com/unknwon/goconfig"
 	"github.com/ztino/jd_seckill/common"
-	"github.com/ztino/jd_seckill/service"
 	"github.com/ztino/jd_seckill/log"
+	"github.com/ztino/jd_seckill/service"
 	"net/http"
 	"strconv"
 	"strings"
@@ -240,9 +240,6 @@ func (this *Seckill) SubmitSeckillOrder() bool {
 		_ = service.SendMessage(this.conf, "茅台抢购通知", "抢购失败，网络错误")
 		return false
 	}
-
-	//临时打印数据
-	log.Println("返回信息:"+body)
 
 	if !gjson.Valid(body) {
 		log.Println("抢购失败，返回信息:" + body)
