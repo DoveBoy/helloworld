@@ -6,7 +6,7 @@ import (
 	"github.com/Albert-Zhan/httpc"
 	"github.com/tidwall/gjson"
 	"github.com/unknwon/goconfig"
-	"log"
+	"github.com/ztino/jd_seckill/log"
 	"net/http"
 )
 

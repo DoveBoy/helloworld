@@ -5,28 +5,16 @@ import (
 	"github.com/unknwon/goconfig"
 	"github.com/ztino/jd_seckill/cmd"
 	"github.com/ztino/jd_seckill/common"
-	"io"
-	"log"
+	"github.com/ztino/jd_seckill/log"
 	"os"
 	"runtime"
-	"time"
 )
 
 func init()  {
-	//日志初始化,将日志同时输出到控制台和文件
+	//日志初始化
 	if !common.IsDir("./logs/") {
-		_=os.Mkdir("./logs/",0777)
+		_ = os.Mkdir("./logs/", 0777)
 	}
-	file := "./logs/jd_seckill_" + time.Now().Format("20060102") + ".log"
-	logFile, logErr := os.OpenFile(file, os.O_CREATE|os.O_APPEND|os.O_RDWR, 0666)
-	if logErr != nil {
-		panic(logErr)
-	}
-	defer logFile.Close()
-	mw := io.MultiWriter(os.Stdout, logFile)
-	log.SetOutput(mw)
-	log.SetPrefix("[jd_seckill] ")
-	log.SetFlags(log.LstdFlags | log.Lshortfile | log.LUTC)
 
 	//客户端设置初始化
 	common.Client=httpc.NewHttpClient()

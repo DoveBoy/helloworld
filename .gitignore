@@ -21,3 +21,4 @@
 /cookie.txt
 *.bak
 go.sum
+/同步代码.sh

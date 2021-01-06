@@ -8,7 +8,7 @@ import (
 	"github.com/tidwall/gjson"
 	"github.com/ztino/jd_seckill/common"
 	"github.com/ztino/jd_seckill/jd_seckill"
-	"log"
+	"github.com/ztino/jd_seckill/log"
 	"net/http"
 	"os"
 	"strconv"

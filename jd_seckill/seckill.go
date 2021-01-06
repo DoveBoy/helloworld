@@ -9,7 +9,7 @@ import (
 	"github.com/unknwon/goconfig"
 	"github.com/ztino/jd_seckill/common"
 	"github.com/ztino/jd_seckill/service"
-	"log"
+	"github.com/ztino/jd_seckill/log"
 	"net/http"
 	"strconv"
 	"strings"

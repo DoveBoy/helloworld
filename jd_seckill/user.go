@@ -7,7 +7,7 @@ import (
 	"github.com/tidwall/gjson"
 	"github.com/unknwon/goconfig"
 	"github.com/ztino/jd_seckill/common"
-	"log"
+	"github.com/ztino/jd_seckill/log"
 	"net/http"
 	"os"
 	"path/filepath"
