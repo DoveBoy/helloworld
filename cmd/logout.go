@@ -3,7 +3,7 @@ package cmd
 import (
 	"github.com/spf13/cobra"
 	"github.com/ztino/jd_seckill/common"
-	"log"
+	"github.com/ztino/jd_seckill/log"
 	"os"
 )
 

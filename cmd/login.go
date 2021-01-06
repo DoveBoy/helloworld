@@ -4,7 +4,7 @@ import (
 	"github.com/spf13/cobra"
 	"github.com/ztino/jd_seckill/common"
 	"github.com/ztino/jd_seckill/jd_seckill"
-	"log"
+	"github.com/ztino/jd_seckill/log"
 	"os"
 	"time"
 )
@@ -30,6 +30,7 @@ func startLogin(cmd *cobra.Command, args []string)  {
 			return
 		}
 		user:=jd_seckill.NewUser(common.Client,common.Config)
+		user.DelQrCode()
 		log.Println("登录成功")
 		userInfo,_:=user.GetUserInfo()
 		log.Println("用户:"+userInfo)
