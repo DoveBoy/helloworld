@@ -85,6 +85,7 @@ func (this *User) TicketInfo(ticket string) (string,error) {
 	req.SetHeader("User-Agent",this.getUserAgent())
 	req.SetHeader("Referer","https://passport.jd.com/uc/login?ltype=logout")
 	resp,body,err:=req.SetUrl("https://passport.jd.com/uc/qrCodeTicketValidation?t="+ticket).SetMethod("get").Send().End()
+	defer this.DelQrCode()
 	if err!=nil || resp.StatusCode!=http.StatusOK {
 		log.Println("二维码信息校验失败")
 		return "",errors.New("二维码信息校验失败")
@@ -135,4 +136,13 @@ func (this *User) GetUserInfo() (string,error) {
 	}
 	b,_:=common.GbkToUtf8([]byte(nickName))
 	return string(b), nil
+}
+
+func (this *User) DelQrCode() {
+	dir, _ := os.Getwd()
+	qrPath := filepath.Join(dir, `./qr_code.png`)
+	log.Println(qrPath)
+	if _, err := os.Stat(qrPath); !os.IsNotExist(err) {
+		os.Remove(qrPath)
+	}
 }

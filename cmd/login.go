@@ -30,6 +30,7 @@ func startLogin(cmd *cobra.Command, args []string)  {
 			return
 		}
 		user:=jd_seckill.NewUser(common.Client,common.Config)
+		user.DelQrCode()
 		log.Println("登录成功")
 		userInfo,_:=user.GetUserInfo()
 		log.Println("用户:"+userInfo)
