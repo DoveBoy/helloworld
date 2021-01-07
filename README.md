@@ -8,7 +8,7 @@ helloworld
 
 >目前编译好的可执行文件有Windows,MacOS,Linux,arm,mips平台。
 
-## 安装
+## 安装(开发者)
 
 方式一(推荐):
 
