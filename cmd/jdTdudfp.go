@@ -59,6 +59,8 @@ func startJdTdudfp(cmd *cobra.Command, args []string) {
 
 		//商品链接
 		good_url,_:=cmd.Flags().GetString("good_url")
+		eid := ""
+		fp := ""
 
 		var res []byte
 		err = chromedp.Run(ctx,
@@ -88,6 +90,8 @@ func startJdTdudfp(cmd *cobra.Command, args []string) {
 			chromedp.Click(".common-submit-btn"),
 			chromedp.Sleep(3 * time.Second),
 			chromedp.Evaluate("_JdTdudfp", &res),
+			chromedp.Evaluate("_JdEid", &eid),
+			chromedp.Evaluate("_JdJrTdRiskFpInfo", &fp),
 		)
 		if err != nil {
 			log.Println("chromedp 出错了")
