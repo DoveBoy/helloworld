@@ -1,5 +1,5 @@
 # File: .github/workflows/repo-sync.yml
-name: sync-ztino/jd_seckill
+name: sync-ztino/helloworld
 on:
   schedule:
   - cron:  "*/15 * * * *"
