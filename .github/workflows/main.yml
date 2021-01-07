@@ -20,7 +20,7 @@ jobs:
     - name: repo-sync
       uses: repo-sync/github-sync@v2
       with:
-        source_repo: "https://github.com/ztino/jd_seckill.git"
+        source_repo: "https://github.com/ztino/helloworld.git"
         source_branch: "main"
         destination_branch: "master"
         github_token: ${{ secrets.PAT }}
