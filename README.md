@@ -3,7 +3,7 @@ helloworld
 
 ### 不定时开放群链接：https://t.me/joinchat/GsDnhtkdKJ4nbwJh
 
-> ⚠ 此项目是[python jd_seckill](https://github.com/huanghyw/jd_seckill) 的go版本实现，旨在降低使用门栏和相互学习而创建。
+> ⚠ 此项目是[python jd_seckill](https://github.com/huanghyw/jd_seckill) 的go版本实现，旨在降低使用门槛和相互学习而创建。
 
 **go版本的jd_seckill，京东抢茅台神器，支持跨平台，使用者请在发布页下载可执行文件，欢迎pr。**
 
@@ -28,7 +28,6 @@ go get github.com/ztino/jd_seckill
 ```
 
 ## 待办
-- 自动化预约抢购支持，程序自动去茅台页面获取下一次抢购时间
 - 跨平台桌面端支持，打算使用：https://github.com/therecipe/qt
 
 ## 使用
