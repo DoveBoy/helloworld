@@ -11,6 +11,9 @@ import (
 	"github.com/ztino/jd_seckill/log"
 	"github.com/ztino/jd_seckill/service"
 	"net/http"
+	"net/url"
+	"os"
+	"regexp"
 	"strconv"
 	"strings"
 	"time"
@@ -42,7 +45,103 @@ func (this *Seckill) SkuTitle() (string, error) {
 	return strings.TrimSpace(doc.Find(".sku-name").Text()), nil
 }
 
+func (this *Seckill) GetDiffTime() int64 {
+	log.Println("获取本地时间与京东云端时间差")
+	localTime := time.Now().UnixNano() / 1e6
+	log.Println("本地系统时间：", time.Unix(0, localTime*1e6))
+
+	jdTime := localTime
+	req := httpc.NewRequest(common.Client)
+	resp, body, err := req.SetUrl("https://a.jd.com//ajax/queryServerData.html").SetMethod("get").Send().End()
+	if err != nil || resp.StatusCode != http.StatusOK {
+		log.Println("获取京东服务器时间失败，以本地时间为准")
+	} else {
+		jdTime = gjson.Get(body, "serverTime").Int()
+	}
+	log.Println("京东云端时间：", time.Unix(0, jdTime*1e6))
+
+	delayTime := time.Now().UnixNano()/1e6 - localTime
+	log.Println("网络请求延时：", delayTime, "ms")
+
+	diffTime := localTime - jdTime + delayTime/2
+	log.Println("实际时间误差：", diffTime, "ms (本地时间-京东云端时间+网络请求延时/2)")
+
+	return diffTime
+}
+
+func (this *Seckill) GetWareBusiness() ([]string, []string, error) {
+	log.Println("获取商品的预约时间、抢购时间")
+	skuId := this.conf.MustValue("config", "sku_id", "")                                                    //商品ID
+	cat := "12259,12260,9435"                                                                               //分类路径，TODO:适配其他商品时要调整
+	area := "16_1303_3484_0"                                                                                //配送至，TODO:适配其他商品时要调整成购买者实际地区
+	shopId := "1000085463"                                                                                  //卖家ID
+	venderId := "1000085463"                                                                                //供应商ID
+	paramJson := "{\"platform2\":\"1\",\"specialAttrStr\":\"p0pp1pppppppppppppppp\",\"skuMarkStr\":\"00\"}" //TODO:不知道干嘛用的?
+	num := this.conf.MustValue("config", "seckill_num", "1")                                                //购买数量
+	req := httpc.NewRequest(this.client)
+	req.SetHeader("User-Agent", this.getUserAgent())
+	req.SetHeader("Referer", fmt.Sprintf("https://item.jd.com/%s.html", skuId))
+	resp, body, err := req.SetUrl(fmt.Sprintf("https://item-soa.jd.com/getWareBusiness?callback=jQuery%s&skuId=%s&cat=%s&area=%s&shopId=%s&venderId=%s&paramJson=%s&num=%s&_=%s",
+		common.RandomNumber(7),
+		skuId,
+		cat,
+		area,
+		shopId,
+		venderId,
+		url.QueryEscape(paramJson),
+		num,
+		strconv.Itoa(int(time.Now().Unix()*1000)),
+	)).SetMethod("get").Send().End()
+
+	var yuyueTimeArr []string
+	var buyTimeArr []string
+	if err != nil || resp.StatusCode != http.StatusOK {
+		log.Println("获取商品详情失败", resp, body, err)
+		return yuyueTimeArr, buyTimeArr, errors.New("访问商品详情失败")
+	}
+	if !gjson.Get(body, "yuyueInfo").Exists() || !gjson.Get(body, "yuyueInfo.yuyueTime").Exists() || !gjson.Get(body, "yuyueInfo.buyTime").Exists() {
+		log.Println("获取商品预约信息失败", body)
+		return yuyueTimeArr, buyTimeArr, errors.New("获取商品预约信息失败")
+	}
+
+	yuyueTime := gjson.Get(body, "yuyueInfo.yuyueTime").String()
+	buyTime := gjson.Get(body, "yuyueInfo.buyTime").String()
+	log.Println("预约起止时间：", yuyueTime)
+	log.Println("购买起止时间：", buyTime)
+
+	reg := regexp.MustCompile(`(\d{4}-\d{2}-\d{2}\s\d{2}:\d{2})`)
+	yuyueTimeArr = reg.FindAllString(yuyueTime, 2)
+	buyTimeArr = reg.FindAllString(buyTime, 2)
+
+	return yuyueTimeArr, buyTimeArr, nil
+}
+
 func (this *Seckill) MakeReserve() {
+	yuyueTimeArr, buyTimeArr, err := this.GetWareBusiness()
+	if err == nil && len(yuyueTimeArr) == 2 {
+		diffTime := this.GetDiffTime()
+		loc, _ := time.LoadLocation("Local")
+		yuyueTimeBegin, _ := time.ParseInLocation(common.DateTimeFormatStr, yuyueTimeArr[0]+":00", loc)
+		yuyueTimeEnd, _ := time.ParseInLocation(common.DateTimeFormatStr, yuyueTimeArr[1]+":59", loc)
+
+		beginTime := yuyueTimeBegin.UnixNano()/1e6 + diffTime
+		endTime := yuyueTimeEnd.UnixNano()/1e6 + diffTime
+
+		diffTime = beginTime - time.Now().UnixNano()/1e6
+		if diffTime > 0 {
+			log.Println("还没到预约时间，等待", diffTime, "ms 后开始预约")
+			time.Sleep(time.Duration(diffTime) * time.Millisecond)
+		}
+
+		diffTime = time.Now().UnixNano()/1e6 - endTime
+		if diffTime > 0 {
+			log.Println("您已经错过预约时间，下次请早！")
+			os.Exit(0)
+		}
+	} else {
+		log.Println("预约起始时间获取失败，立即尝试预约：", err, yuyueTimeArr)
+	}
+
 	user := NewUser(this.client, this.conf)
 	userInfo, _ := user.GetUserInfo()
 	log.Println("用户:" + userInfo)
@@ -63,9 +162,26 @@ func (this *Seckill) MakeReserve() {
 		reserveUrl := gjson.Get(body, "url").String()
 		req = httpc.NewRequest(this.client)
 		_, _, _ = req.SetUrl("https:" + reserveUrl).SetMethod("get").Send().End()
-		msg := "预约成功，已获得抢购资格 / 您已成功预约过了，无需重复预约！[我的预约](https://yushou.jd.com/member/qualificationList.action)"
-		_ = service.SendMessage(this.conf, "茅台抢购通知", msg)
+		msg := "商品名称《" + shopTitle + "》预约成功，已获得抢购资格 / 您已成功预约过了，无需重复预约！\n\n[我的预约](https://yushou.jd.com/member/qualificationList.action)"
+		_ = service.SendMessage(this.conf, "京东秒杀通知", msg)
 		log.Println(msg)
+
+		//更新购买时间
+		if len(buyTimeArr) == 2 {
+			confFile := "./conf.ini"
+			cfg, err := goconfig.LoadConfigFile(confFile)
+			if err != nil {
+				log.Println("配置文件不存在，程序退出")
+				os.Exit(0)
+			}
+			buyTime := buyTimeArr[0] + ":00"
+			cfg.SetValue("config", "buy_time", buyTime)
+			if err := goconfig.SaveConfigFile(cfg, confFile); err != nil {
+				log.Println("保存配置文件失败，请手动修改conf.ini，buy_time =", buyTime)
+			}
+
+			log.Println("下一次抢购开始时间设定已经更新:", buyTime)
+		}
 	}
 }
 
@@ -237,13 +353,13 @@ func (this *Seckill) SubmitSeckillOrder() bool {
 	resp, body, err := req.SetUrl("https://marathon.jd.com/seckillnew/orderService/pc/submitOrder.action?skuId=" + skuId).SetMethod("post").Send().End()
 	if err != nil || resp.StatusCode != http.StatusOK {
 		log.Println("抢购失败，网络错误")
-		_ = service.SendMessage(this.conf, "茅台抢购通知", "抢购失败，网络错误")
+		_ = service.SendMessage(this.conf, "京东秒杀通知", "抢购失败，网络错误")
 		return false
 	}
 
 	if !gjson.Valid(body) {
 		log.Println("抢购失败，返回信息:" + body)
-		_ = service.SendMessage(this.conf, "茅台抢购通知", "抢购失败，返回信息:"+body)
+		_ = service.SendMessage(this.conf, "京东秒杀通知", "抢购失败，返回信息:"+body)
 		return false
 	}
 	if gjson.Get(body, "success").Bool() {
@@ -251,11 +367,11 @@ func (this *Seckill) SubmitSeckillOrder() bool {
 		totalMoney := gjson.Get(body, "totalMoney").String()
 		payUrl := "https:" + gjson.Get(body, "pcUrl").String()
 		log.Println(fmt.Sprintf("抢购成功，订单号:%s, 总价:%s, 电脑端付款链接:%s", orderId, totalMoney, payUrl))
-		_ = service.SendMessage(this.conf, "茅台抢购通知", fmt.Sprintf("抢购成功，订单号:%s, 总价:%s, 电脑端付款链接:%s", orderId, totalMoney, payUrl))
+		_ = service.SendMessage(this.conf, "京东秒杀通知", fmt.Sprintf("抢购成功，订单号:%s, 总价:%s, 电脑端付款链接:%s", orderId, totalMoney, payUrl))
 		return true
 	} else {
 		log.Println("抢购失败，返回信息:" + body)
-		_ = service.SendMessage(this.conf, "茅台抢购通知", "抢购失败，返回信息:"+body)
+		_ = service.SendMessage(this.conf, "京东秒杀通知", "抢购失败，返回信息:"+body)
 		return false
 	}
 }
