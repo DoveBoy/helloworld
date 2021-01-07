@@ -102,8 +102,18 @@ func Exists(path string) bool {
 
 func OpenImage(qrPath string) {
 	if runtime.GOOS == "windows" {//windows
-		cmd := exec.Command("cmd", "/k", "start", qrPath)
+		cmd := exec.Command("cmd", "/c", "rundll32.exe", "C:\\Windows\\System32\\shimgvw.dll,ImageView_FullscreenA", qrPath)
 		_ = cmd.Start()
+		//扫码后二维码自动删除，自动关闭照片查看器
+		go func() {
+			for {
+				time.Sleep(time.Duration(1) * time.Second)
+				if !Exists(qrPath) {
+					_ = exec.Command("taskkill", "/F", "/T", "/PID", fmt.Sprint(cmd.Process.Pid)).Run()
+					break
+				}
+			}
+		}()
 	}else if runtime.GOOS == "darwin" {//Macos
 		cmd := exec.Command("open", qrPath)
 		_ = cmd.Start()
