@@ -32,7 +32,12 @@ func getLoggerLevel(lvl string) zapcore.Level {
 }
 
 func init() {
-	fileName := fmt.Sprintf("./logs/jd_seckill_%s.log", time.Now().Format("20060102"))
+	softDir := "."
+	if dir, err := os.Getwd(); err != nil {
+		softDir = dir
+	}
+	fileName := fmt.Sprintf("%s/logs/jd_seckill_%s.log", softDir, time.Now().Format("20060102"))
+	fmt.Println("日志文件：", fileName)
 	hook := lumberjack.Logger{
 		Filename:   fileName, // 日志文件路径
 		MaxSize:    128,      // 每个日志文件保存的最大尺寸 单位：M
