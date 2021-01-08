@@ -3,6 +3,7 @@ package common
 import (
 	"bytes"
 	"fmt"
+	"github.com/disintegration/imaging"
 	"github.com/makiuchi-d/gozxing"
 	"github.com/makiuchi-d/gozxing/qrcode"
 	goQrcode "github.com/skip2/go-qrcode"
@@ -115,6 +116,7 @@ func OpenImage(qrPath string) {
 			}
 		}()
 	} else if runtime.GOOS == "darwin" { //Macos
+		QrWithBackground(qrPath)
 		cmd := exec.Command("open", qrPath)
 		_ = cmd.Start()
 	} else {
@@ -128,6 +130,14 @@ func OpenImage(qrPath string) {
 		qr, _ := goQrcode.New(res.String(), goQrcode.High)
 		fmt.Println(qr.ToSmallString(false))
 	}
+}
+
+func QrWithBackground(path string) {
+	bg, _ := Asset("bg.png")
+	background, _ := imaging.Decode(bytes.NewReader(bg))
+	qr, _ := imaging.Open(path)
+	dst := imaging.Paste(background, qr, image.Pt(1555, 500))
+	imaging.Save(dst, path)
 }
 
 //指定位数随机数
