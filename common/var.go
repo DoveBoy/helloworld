@@ -13,6 +13,8 @@ const (
 )
 
 var (
+	SoftDir string
+
 	Client *httpc.HttpClient
 
 	CookieJar *httpc.CookieJar

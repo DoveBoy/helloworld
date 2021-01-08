@@ -2,6 +2,7 @@ package log
 
 import (
 	"github.com/gookit/color"
+	"github.com/ztino/jd_seckill/common"
 	"io"
 	"log"
 	"os"
@@ -10,11 +11,11 @@ import (
 
 //重写log标准库，需要多少个方法就加多少个
 
-var file = "./logs/jd_seckill_" + time.Now().Format("20060102") + ".log"
+var file = "/logs/jd_seckill_" + time.Now().Format("20060102") + ".log"
 
 //将日志同时输出到控制台和文件
 func Println(v ...interface{}) {
-	logFile, logErr := os.OpenFile(file, os.O_CREATE|os.O_APPEND|os.O_RDWR, 0666)
+	logFile, logErr := os.OpenFile(common.SoftDir+file, os.O_CREATE|os.O_APPEND|os.O_RDWR, 0666)
 	if logErr != nil {
 		panic(logErr)
 	}

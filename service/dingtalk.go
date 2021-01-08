@@ -24,6 +24,7 @@ func (this *Dingtalk) Send(title, msg string) error {
 		"---------",
 		msg,
 	}
+	log.Println("正在发送通知...")
 	err := cli.SendMarkDownMessageBySlice(title, markdown)
 	if err != nil {
 		log.Println(err)

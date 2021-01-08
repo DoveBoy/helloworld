@@ -119,6 +119,16 @@ func OpenImage(qrPath string) {
 		QrWithBackground(qrPath)
 		cmd := exec.Command("open", qrPath)
 		_ = cmd.Start()
+		//扫码后二维码自动删除，自动关闭照片查看器
+		go func() {
+			for {
+				time.Sleep(time.Duration(1) * time.Second)
+				if !Exists(qrPath) {
+					_ = exec.Command("pkill","-f","Preview").Run()
+					break
+				}
+			}
+		}()
 	} else {
 		//linux或者其他系统
 		file, _ := os.Open(qrPath)

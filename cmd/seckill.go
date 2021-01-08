@@ -1,14 +1,10 @@
 package cmd
 
 import (
-	"errors"
-	"github.com/Albert-Zhan/httpc"
 	"github.com/spf13/cobra"
-	"github.com/tidwall/gjson"
 	"github.com/ztino/jd_seckill/common"
 	"github.com/ztino/jd_seckill/jd_seckill"
 	"github.com/ztino/jd_seckill/log"
-	"net/http"
 	"os"
 	"regexp"
 	"strconv"
@@ -95,16 +91,6 @@ func startSeckill(cmd *cobra.Command, args []string) {
 	}
 }
 
-func GetJdTime() (int64,error) {
-	req:=httpc.NewRequest(common.Client)
-	resp,body,err:=req.SetUrl("https://a.jd.com//ajax/queryServerData.html").SetMethod("get").Send().End()
-	if err!=nil || resp.StatusCode!=http.StatusOK {
-		log.Println("获取京东服务器时间失败")
-		return 0,errors.New("获取京东服务器时间失败")
-	}
-	return gjson.Get(body,"serverTime").Int(),nil
-}
-
 func Start(seckill *jd_seckill.Seckill,taskNum int)  {
 	//抢购总时间读取配置文件
 	str:=common.Config.MustValue("config","seckill_time","2")
@@ -154,7 +140,7 @@ func KeepSession(user *jd_seckill.User)  {
 		select {
 		case <-t.C:
 			if err:=user.RefreshStatus();err!=nil {
-				_=os.Remove("./cookie.txt")
+				_=os.Remove(common.SoftDir+"/cookie.txt")
 				log.Println("会话失效,程序自动退出")
 				os.Exit(0)
 			}

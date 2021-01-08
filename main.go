@@ -11,9 +11,17 @@ import (
 )
 
 func init()  {
+	//软件目录获取
+	dir,err:=os.Getwd()
+	if err!=nil {
+		common.SoftDir="."
+	}else{
+		common.SoftDir=dir
+	}
+
 	//日志初始化
-	if !common.IsDir("./logs/") {
-		_ = os.Mkdir("./logs/", 0777)
+	if !common.IsDir(common.SoftDir+"/logs/") {
+		_ = os.Mkdir(common.SoftDir+"/logs/", 0777)
 	}
 
 	//客户端设置初始化
@@ -22,8 +30,7 @@ func init()  {
 	common.Client.SetCookieJar(common.CookieJar)
 
 	//配置文件初始化
-	confFile:="./conf.ini"
-	var err error
+	confFile:=common.SoftDir+"/conf.ini"
 	if common.Config,err=goconfig.LoadConfigFile(confFile);err!=nil {
 		log.Println("配置文件不存在，程序退出")
 		os.Exit(0)

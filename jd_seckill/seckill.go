@@ -168,7 +168,7 @@ func (this *Seckill) MakeReserve() {
 
 		//更新购买时间
 		if len(buyTimeArr) == 2 {
-			confFile := "./conf.ini"
+			confFile := common.SoftDir+"/conf.ini"
 			cfg, err := goconfig.LoadConfigFile(confFile)
 			if err != nil {
 				log.Println("配置文件不存在，程序退出")
@@ -294,7 +294,7 @@ func (this *Seckill) SubmitSeckillOrder() bool {
 	}
 	address := gjson.Get(initInfo, "addressList").Array()
 	if !gjson.Get(initInfo, "addressList").Exists() || len(address)<1 {
-		log.Println("抢购失败，可能你还未设置默认收货地址")
+		log.Println("抢购失败，返回信息:"+initInfo)
 		return false
 	}
 	defaultAddress := address[0]

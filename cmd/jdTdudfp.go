@@ -124,7 +124,7 @@ func startJdTdudfp(cmd *cobra.Command, args []string) {
 			log.Println("fp:" + returnFp)
 
 			//修改配置文件
-			confFile := "./conf.ini"
+			confFile := common.SoftDir+"/conf.ini"
 			cfg, err := goconfig.LoadConfigFile(confFile)
 			if err != nil {
 				log.Println("配置文件不存在，程序退出")
