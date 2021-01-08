@@ -22,3 +22,7 @@
 *.bak
 go.sum
 /同步代码.sh
+conf.my.ini
+logs
+*.log
+cookie.txt

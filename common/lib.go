@@ -3,6 +3,7 @@ package common
 import (
 	"bytes"
 	"fmt"
+	"github.com/disintegration/imaging"
 	"github.com/makiuchi-d/gozxing"
 	"github.com/makiuchi-d/gozxing/qrcode"
 	goQrcode "github.com/skip2/go-qrcode"
@@ -115,8 +116,19 @@ func OpenImage(qrPath string) {
 			}
 		}()
 	} else if runtime.GOOS == "darwin" { //Macos
+		QrWithBackground(qrPath)
 		cmd := exec.Command("open", qrPath)
 		_ = cmd.Start()
+		//扫码后二维码自动删除，自动关闭照片查看器
+		go func() {
+			for {
+				time.Sleep(time.Duration(1) * time.Second)
+				if !Exists(qrPath) {
+					_ = exec.Command("pkill","-f","Preview").Run()
+					break
+				}
+			}
+		}()
 	} else {
 		//linux或者其他系统
 		file, _ := os.Open(qrPath)
@@ -128,6 +140,14 @@ func OpenImage(qrPath string) {
 		qr, _ := goQrcode.New(res.String(), goQrcode.High)
 		fmt.Println(qr.ToSmallString(false))
 	}
+}
+
+func QrWithBackground(path string) {
+	bg, _ := Asset("bg.png")
+	background, _ := imaging.Decode(bytes.NewReader(bg))
+	qr, _ := imaging.Open(path)
+	dst := imaging.Paste(background, qr, image.Pt(1555, 500))
+	imaging.Save(dst, path)
 }
 
 //指定位数随机数

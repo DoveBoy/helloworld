@@ -63,14 +63,14 @@ func (this *Session) LoadCookieToJar(path string) error {
 }
 
 func (this *Session) CheckLoginStatus() error {
-	err:=this.LoadCookieToJar("./cookie.txt")
+	err:=this.LoadCookieToJar(common.SoftDir+"/cookie.txt")
 	if err!=nil {
 		return err
 	}
 	//检测cookie会话状态
 	user:=NewUser(common.Client,common.Config)
 	if status:=user.RefreshStatus();status!=nil {
-		_=os.Remove("./cookie.txt")
+		_=os.Remove(common.SoftDir+"/cookie.txt")
 		return errors.New("登录失效，请重新登录")
 	}
 	return nil

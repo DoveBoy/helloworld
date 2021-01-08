@@ -30,7 +30,6 @@ func startLogin(cmd *cobra.Command, args []string)  {
 			return
 		}
 		user:=jd_seckill.NewUser(common.Client,common.Config)
-		user.DelQrCode()
 		log.Println("登录成功")
 		userInfo,_:=user.GetUserInfo()
 		log.Println("用户:"+userInfo)
@@ -50,6 +49,8 @@ func startLogin(cmd *cobra.Command, args []string)  {
 			time.Sleep(2*time.Second)
 		}
 		_,err=user.TicketInfo(ticket)
+		//稍微堵塞一秒，防止图像管理器未被关闭，主程序就退出了
+		time.Sleep(1*time.Second)
 		if err==nil {
 			if status:=user.RefreshStatus();status==nil {
 				//保存cookie

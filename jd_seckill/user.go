@@ -43,7 +43,7 @@ func (this *User) QrLogin() (string,error) {
 	req:=httpc.NewRequest(this.client)
 	req.SetHeader("User-Agent",this.getUserAgent())
 	req.SetHeader("Referer","https://passport.jd.com/new/login.aspx")
-	resp,err:=req.SetUrl("https://qr.m.jd.com/show?appid=133&size=300&t="+strconv.Itoa(int(time.Now().Unix()*1000))).SetMethod("get").Send().EndFile("./","qr_code.png")
+	resp,err:=req.SetUrl("https://qr.m.jd.com/show?appid=133&size=300&t="+strconv.Itoa(int(time.Now().Unix()*1000))).SetMethod("get").Send().EndFile(common.SoftDir+"/","qr_code.png")
 	if err!=nil || resp.StatusCode!=http.StatusOK {
 		log.Println("获取二维码失败")
 		return "",errors.New("获取二维码失败")
@@ -57,8 +57,7 @@ func (this *User) QrLogin() (string,error) {
 		}
 	}
 	log.Println("二维码获取成功，请打开京东APP扫描")
-	dir,_:=os.Getwd()
-	qrPath := filepath.Join(dir, `./qr_code.png`)
+	qrPath := filepath.Join(common.SoftDir, `./qr_code.png`)
 	common.OpenImage(qrPath)
 	return wlfstkSmdl,nil
 }
@@ -139,8 +138,7 @@ func (this *User) GetUserInfo() (string,error) {
 }
 
 func (this *User) DelQrCode() {
-	dir, _ := os.Getwd()
-	qrPath := filepath.Join(dir, `./qr_code.png`)
+	qrPath := filepath.Join(common.SoftDir, `./qr_code.png`)
 	if common.Exists(qrPath) {
 		_=os.Remove(qrPath)
 	}
