@@ -156,6 +156,20 @@ Xvfb -ac :99 -screen 0 1280x1024x16 & export DISPLAY=:99
 #参数--good_url商品链接必须设置，链接地址是一个可以加入购物车的商品
 jd_seckill jdTdudfp --good_url https://item.jd.com/100007959916.html
 ```
+## docker 运行
+（1）构建镜像
+```shell
+docker-compose build
+```
+(2) 运行
+修改 conf.ini 配置文件后，直接运行 TODO: 暂不知环境变量
+```shell
+docker-compose up -d
+```
+随后界面上会打印二维码，扫描登陆完成即可：
+```shell
+docker-compose logs -f
+```
 
 ## 感谢
 ##### 非常感谢原作者 https://github.com/zhou-xiaojun/jd_mask 提供的代码
