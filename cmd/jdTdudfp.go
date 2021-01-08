@@ -60,6 +60,14 @@ func startJdTdudfp(cmd *cobra.Command, args []string) {
 		//商品链接
 		good_url,_:=cmd.Flags().GetString("good_url")
 
+		//返回的eid和fp
+		returnEid:=""
+		returnFp:=""
+
+		//获取到的eid和fp
+		eid := ""
+		fp := ""
+
 		var res []byte
 		err = chromedp.Run(ctx,
 			chromedp.Tasks{
@@ -88,6 +96,8 @@ func startJdTdudfp(cmd *cobra.Command, args []string) {
 			chromedp.Click(".common-submit-btn"),
 			chromedp.Sleep(3 * time.Second),
 			chromedp.Evaluate("_JdTdudfp", &res),
+			chromedp.Evaluate("_JdEid", &eid),
+			chromedp.Evaluate("_JdJrTdRiskFpInfo", &fp),
 		)
 		if err != nil {
 			log.Println("chromedp 出错了")
@@ -95,13 +105,23 @@ func startJdTdudfp(cmd *cobra.Command, args []string) {
 		}
 
 		value := string(res)
-		if !gjson.Valid(value) || gjson.Get(value, "eid").String() == "" || gjson.Get(value, "fp").String() == "" {
+		//判断_JdTdudfp是否能获取到eid和fp，如果不能去获取_JdEid和_JdJrTdRiskFpInfo获取到的值
+		if gjson.Valid(value) && gjson.Get(value, "eid").String() != "" && gjson.Get(value, "fp").String() != "" {
+			returnEid = gjson.Get(value, "eid").String()
+			returnFp = gjson.Get(value, "fp").String()
+		}else{
+			if eid!="" && fp!=""{
+				returnEid=eid
+				returnFp=fp
+			}
+		}
+
+		//eid,fp合法性判断
+		if returnEid=="" || returnFp=="" {
 			log.Println("获取失败，请重新尝试，返回信息:" + value)
-		} else {
-			eid := gjson.Get(value, "eid").String()
-			fp := gjson.Get(value, "fp").String()
-			log.Println("eid:" + eid)
-			log.Println("fp:" + fp)
+		}else{
+			log.Println("eid:" + returnEid)
+			log.Println("fp:" + returnFp)
 
 			//修改配置文件
 			confFile := "./conf.ini"
@@ -111,14 +131,13 @@ func startJdTdudfp(cmd *cobra.Command, args []string) {
 				os.Exit(0)
 			}
 
-			cfg.SetValue("config", "eid", eid)
-			cfg.SetValue("config", "fp", fp)
+			cfg.SetValue("config", "eid", returnEid)
+			cfg.SetValue("config", "fp", returnFp)
 			if err := goconfig.SaveConfigFile(cfg, confFile); err != nil {
 				log.Println("保存配置文件失败，请手动填入配置文件")
+			}else{
+				log.Println("eid, fp参数已经自动填入配置文件")
 			}
-
-			log.Println("eid, fp参数已经自动填入配置文件")
 		}
-
 	}
 }

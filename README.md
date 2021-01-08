@@ -1,9 +1,30 @@
-Jd_Seckill
+helloworld
 =======
 
-#### 还未收到安全通知，但是估计也快了，给大家建个Telegram群吧，茶余饭后，聊天扯淡，有条件的可以加入：https://t.me/joinchat/GsDnhtkdKJ4nbwJh
+## 特别声明:
 
-> ⚠ 此项目是[python jd_seckill](https://github.com/huanghyw/jd_seckill) 的go版本实现，旨在降低使用门栏和相互学习而创建。
+* 本仓库发布的`helloworld`项目中涉及的任何脚本，仅用于测试和学习研究，禁止用于商业用途，不能保证其合法性，准确性，完整性和有效性，请根据情况自行判断。
+
+* 本项目内所有资源文件，禁止任何公众号、自媒体进行任何形式的转载、发布。
+
+* `ztino` 对任何脚本问题概不负责，包括但不限于由任何脚本错误导致的任何损失或损害.
+
+* 间接使用脚本的任何用户，包括但不限于建立VPS或在某些行为违反国家/地区法律或相关法规的情况下进行传播, `ztino` 对于由此引起的任何隐私泄漏或其他后果概不负责。
+
+* 请勿将`helloworld`项目的任何内容用于商业或非法目的，否则后果自负。
+
+* 如果任何单位或个人认为该项目的脚本可能涉嫌侵犯其权利，则应及时通知并提供身份证明，所有权证明，我们将在收到认证文件后删除相关脚本。
+
+* 以任何方式查看此项目的人或直接或间接使用`helloworld`项目的任何脚本的使用者都应仔细阅读此声明。`ztino` 保留随时更改或补充此免责声明的权利。一旦使用并复制了任何相关脚本或`helloworld`项目，则视为您已接受此免责声明。
+  
+* 您必须在下载后的24小时内从计算机或手机中完全删除以上内容。  
+  
+* 本项目遵循`GPL-3.0 License`协议，如果本特别声明与`GPL-3.0 License`协议有冲突之处，以本特别声明为准。
+
+> ***您使用或者复制了本仓库且本人制作的任何代码或项目，则视为`已接受`此声明，请仔细阅读***  
+> ***您在本声明未发出之时点使用或者复制了本仓库且本人制作的任何代码或项目且此时还在使用，则视为`已接受`此声明，请仔细阅读***
+
+> ⚠ 此项目是[python jd_seckill](https://github.com/huanghyw/jd_seckill) 的go版本实现，旨在降低使用门槛和相互学习而创建。
 
 **go版本的jd_seckill，京东抢茅台神器，支持跨平台，使用者请在发布页下载可执行文件，欢迎pr。**
 
@@ -11,7 +32,7 @@ Jd_Seckill
 
 >目前编译好的可执行文件有Windows,MacOS,Linux,arm,mips平台。
 
-## 安装
+## 安装(开发者)
 
 方式一(推荐):
 
@@ -28,7 +49,6 @@ go get github.com/ztino/jd_seckill
 ```
 
 ## 待办
-- 自动化预约抢购支持，程序自动去茅台页面获取下一次抢购时间
 - 跨平台桌面端支持，打算使用：https://github.com/therecipe/qt
 
 ## 使用
@@ -120,6 +140,22 @@ jd_seckill version
 
 (8)通知配置
 > 目前支持email，wechat，dingtalk，具体可查看配置文件
+
+## Linux 无图形界面获取 eid 与 fp 方法参考
+(1) 安装无头 chrome
+```shell
+sudo apt install ./google-chrome-stable_current_amd64.deb
+sudo apt-get -y install xorg xvfb gtk2-engines-pixbuf
+sudo apt-get -y install dbus-x11 xfonts-base xfonts-100dpi xfonts-75dpi xfonts-cyrillic xfonts-scalable
+sudo apt-get install -y xvfb
+
+Xvfb -ac :99 -screen 0 1280x1024x16 & export DISPLAY=:99
+```
+(2) 执行获取 eid 与 fp
+```shell
+#参数--good_url商品链接必须设置，链接地址是一个可以加入购物车的商品
+jd_seckill jdTdudfp --good_url https://item.jd.com/100007959916.html
+```
 
 ## 感谢
 ##### 非常感谢原作者 https://github.com/zhou-xiaojun/jd_mask 提供的代码
