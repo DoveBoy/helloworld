@@ -163,7 +163,7 @@ func (this *Seckill) MakeReserve() {
 		req = httpc.NewRequest(this.client)
 		_, _, _ = req.SetUrl("https:" + reserveUrl).SetMethod("get").Send().End()
 		msg := "商品名称《" + shopTitle + "》预约成功，已获得抢购资格 / 您已成功预约过了，无需重复预约！\n\n[我的预约](https://yushou.jd.com/member/qualificationList.action)"
-		go service.SendMessage(this.conf, "京东秒杀通知", msg)
+		_ = service.SendMessage(this.conf, "京东秒杀通知", msg)
 		log.Debug(msg)
 
 		//更新购买时间
@@ -353,13 +353,13 @@ func (this *Seckill) SubmitSeckillOrder() bool {
 	resp, body, err := req.SetUrl("https://marathon.jd.com/seckillnew/orderService/pc/submitOrder.action?skuId=" + skuId).SetMethod("post").Send().End()
 	if err != nil || resp.StatusCode != http.StatusOK {
 		log.Error("抢购失败，网络错误")
-		go service.SendMessage(this.conf, "京东秒杀通知", "抢购失败，网络错误")
+		_ = service.SendMessage(this.conf, "京东秒杀通知", "抢购失败，网络错误")
 		return false
 	}
 
 	if !gjson.Valid(body) {
 		log.Error("抢购失败，返回信息:" + body)
-		go service.SendMessage(this.conf, "京东秒杀通知", "抢购失败，返回信息:"+body)
+		_ = service.SendMessage(this.conf, "京东秒杀通知", "抢购失败，返回信息:"+body)
 		return false
 	}
 	if gjson.Get(body, "success").Bool() {
@@ -367,11 +367,11 @@ func (this *Seckill) SubmitSeckillOrder() bool {
 		totalMoney := gjson.Get(body, "totalMoney").String()
 		payUrl := "https:" + gjson.Get(body, "pcUrl").String()
 		log.Println(fmt.Sprintf("抢购成功，订单号:%s, 总价:%s, 电脑端付款链接:%s", orderId, totalMoney, payUrl))
-		go service.SendMessage(this.conf, "京东秒杀通知", fmt.Sprintf("抢购成功，订单号:%s, 总价:%s, 电脑端付款链接:%s", orderId, totalMoney, payUrl))
+		_ = service.SendMessage(this.conf, "京东秒杀通知", fmt.Sprintf("抢购成功，订单号:%s, 总价:%s, 电脑端付款链接:%s", orderId, totalMoney, payUrl))
 		return true
 	} else {
 		log.Error("抢购失败，返回信息:" + body)
-		go service.SendMessage(this.conf, "京东秒杀通知", "抢购失败，返回信息:"+body)
+		_ = service.SendMessage(this.conf, "京东秒杀通知", "抢购失败，返回信息:"+body)
 		return false
 	}
 }
