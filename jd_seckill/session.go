@@ -24,35 +24,35 @@ func (this *Session) SaveCookieToFile(path string) error {
 	u,_:=url.Parse("https://jd.com")
 	cookies:=this.cookieJar.Cookies(u)
 	if len(cookies)==0 {
-		log.Println("保存cookie失败，未找到相关cookie")
+		log.Error("保存cookie失败，未找到相关cookie")
 		return errors.New("保存cookie失败，未找到相关cookie")
 	}
 	data,_:=json.Marshal(cookies)
 
 	err:=ioutil.WriteFile(path,data,0777)
 	if err!=nil{
-		log.Println("保存cookie失败，错误信息:"+err.Error())
+		log.Error("保存cookie失败，错误信息:"+err.Error())
 		return errors.New("保存cookie失败，错误信息:"+err.Error())
 	}
-	log.Println("保存cookie成功")
+	log.Info("保存cookie成功")
 	return nil
 }
 
 func (this *Session) LoadCookieToJar(path string) error {
 	if !common.Exists(path) {
-		log.Println("cookie文件不存在")
+		log.Error("cookie文件不存在")
 		return errors.New("cookie文件不存在")
 	}
 	data,err:=ioutil.ReadFile(path)
 	if err!=nil {
-		log.Println("读取cookie失败，错误信息:"+err.Error())
+		log.Error("读取cookie失败，错误信息:"+err.Error())
 		return errors.New("读取cookie失败，错误信息:"+err.Error())
 	}
 
 	var cookies []*http.Cookie
 	err=json.Unmarshal(data,&cookies)
 	if err!=nil {
-		log.Println("解析cookie失败，错误信息:"+err.Error())
+		log.Error("解析cookie失败，错误信息:"+err.Error())
 		return errors.New("解析cookie失败，错误信息:"+err.Error())
 	}
 

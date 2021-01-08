@@ -42,7 +42,7 @@ func (this *Dingtalk) Send(title, msg string) error {
 	}
 
 	if err != nil {
-		log.Println(err)
+		log.Error(err)
 		return err
 	}
 

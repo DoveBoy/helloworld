@@ -26,13 +26,13 @@ func startLogin(cmd *cobra.Command, args []string)  {
 		//已登录，检测登录状态
 		err:=session.CheckLoginStatus()
 		if err!=nil {
-			log.Println("登录失效，请重新登录")
+			log.Error("登录失效，请重新登录")
 			return
 		}
 		user:=jd_seckill.NewUser(common.Client,common.Config)
 		log.Println("登录成功")
 		userInfo,_:=user.GetUserInfo()
-		log.Println("用户:"+userInfo)
+		log.Debug("用户:"+userInfo)
 	}else{
 		//未登录
 		user:=jd_seckill.NewUser(common.Client,common.Config)
@@ -57,12 +57,12 @@ func startLogin(cmd *cobra.Command, args []string)  {
 				_=session.SaveCookieToFile("./cookie.txt")
 				log.Println("登录成功")
 				userInfo,_:=user.GetUserInfo()
-				log.Println("用户:"+userInfo)
+				log.Debug("用户:"+userInfo)
 			}else{
-				log.Println("登录失效")
+				log.Error("登录失效")
 			}
 		}else{
-			log.Println("登录失败")
+			log.Error("登录失败")
 		}
 	}
 }

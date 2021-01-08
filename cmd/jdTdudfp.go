@@ -32,9 +32,9 @@ func startJdTdudfp(cmd *cobra.Command, args []string) {
 	session := jd_seckill.NewSession(common.CookieJar)
 	err := session.CheckLoginStatus()
 	if err != nil {
-		log.Println("自动获取eid和fp失败，请重新登录")
+		log.Error("自动获取eid和fp失败，请重新登录")
 	} else {
-		log.Println("开始自动获取eid和fp，如遇卡住请结束进程，重新启动")
+		log.Warn("开始自动获取eid和fp，如遇卡住请结束进程，重新启动")
 		options := []chromedp.ExecAllocatorOption{
 			chromedp.Flag("headless", false),                       //debug使用
 			chromedp.Flag("blink-settings", "imagesEnabled=false"), //禁用图片加载
@@ -100,7 +100,7 @@ func startJdTdudfp(cmd *cobra.Command, args []string) {
 			chromedp.Evaluate("_JdJrTdRiskFpInfo", &fp),
 		)
 		if err != nil {
-			log.Println("chromedp 出错了")
+			log.Error("chromedp 出错了")
 			log.Fatal(err)
 		}
 
@@ -118,7 +118,7 @@ func startJdTdudfp(cmd *cobra.Command, args []string) {
 
 		//eid,fp合法性判断
 		if returnEid=="" || returnFp=="" {
-			log.Println("获取失败，请重新尝试，返回信息:" + value)
+			log.Error("获取失败，请重新尝试，返回信息:" + value)
 		}else{
 			log.Println("eid:" + returnEid)
 			log.Println("fp:" + returnFp)
@@ -127,14 +127,14 @@ func startJdTdudfp(cmd *cobra.Command, args []string) {
 			confFile := common.SoftDir+"/conf.ini"
 			cfg, err := goconfig.LoadConfigFile(confFile)
 			if err != nil {
-				log.Println("配置文件不存在，程序退出")
+				log.Error("配置文件不存在，程序退出")
 				os.Exit(0)
 			}
 
 			cfg.SetValue("config", "eid", returnEid)
 			cfg.SetValue("config", "fp", returnFp)
 			if err := goconfig.SaveConfigFile(cfg, confFile); err != nil {
-				log.Println("保存配置文件失败，请手动填入配置文件")
+				log.Error("保存配置文件失败，请手动填入配置文件")
 			}else{
 				log.Println("eid, fp参数已经自动填入配置文件")
 			}

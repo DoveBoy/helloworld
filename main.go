@@ -32,7 +32,7 @@ func init()  {
 	//配置文件初始化
 	confFile:=common.SoftDir+"/conf.ini"
 	if common.Config,err=goconfig.LoadConfigFile(confFile);err!=nil {
-		log.Println("配置文件不存在，程序退出")
+		log.Error("配置文件不存在，程序退出")
 		os.Exit(0)
 	}
 
