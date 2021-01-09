@@ -122,21 +122,18 @@ func OpenImage(qrPath, qrcodeShowType string) {
 		var cmd *exec.Cmd
 		if runtime.GOOS == "windows" {
 			cmd = exec.Command("cmd", "/c", "rundll32.exe", "C:\\Windows\\System32\\shimgvw.dll,ImageView_FullscreenA", qrPath)
-		} else {
-			cmd = exec.Command("open", qrPath)
+		} else if runtime.GOOS == "darwin" {
+			//MacOS下指定使用“预览”打开
+			cmd = exec.Command("open", "-a", "Preview.app", qrPath)
 		}
-		_ = cmd.Start()
 
-		//扫码后二维码自动删除，自动关闭照片查看器
-		go func() {
-			for {
-				time.Sleep(time.Duration(1) * time.Second)
-				if !Exists(qrPath) {
-					_ = exec.Command("taskkill", "/F", "/T", "/PID", fmt.Sprint(cmd.Process.Pid)).Run()
-					break
-				}
+		if cmd != nil {
+			if err := cmd.Start();err == nil{
+				//TODO:照片查看器的进程ID，扫码后自动关闭；MacOS下获取到进程ID不对
+				ViewQrcodePid = cmd.Process.Pid
 			}
-		}()
+		}
+
 		return
 	}
 
