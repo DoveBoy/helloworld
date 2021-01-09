@@ -7,7 +7,7 @@ import (
 
 const (
 	SoftName          = "jd_seckill"
-	Version           = "0.2.1"
+	Version           = "0.2.4"
 	DateTimeFormatStr = "2006-01-02 15:04:05"
 	DateFormatStr     = "2006-01-02"
 	IniFileContent    = `#默认配置
