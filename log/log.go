@@ -2,13 +2,12 @@ package log
 
 import (
 	"fmt"
-	"os"
-	"time"
-
 	"github.com/natefinch/lumberjack"
 	"github.com/unknwon/goconfig"
 	"go.uber.org/zap"
 	"go.uber.org/zap/zapcore"
+	"os"
+	"time"
 )
 
 // error logger
@@ -63,7 +62,7 @@ func init() {
 
 	// 设置日志级别
 	lvl := "info"
-	if cfg, err := goconfig.LoadConfigFile("./conf.ini"); err == nil {
+	if cfg, err := goconfig.LoadConfigFile(softDir+"/conf.ini"); err == nil {
 		lvl, _ = cfg.GetValue("config", "log_level")
 	}
 	fmt.Println(lvl)
