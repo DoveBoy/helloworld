@@ -4,11 +4,16 @@ import (
 	"errors"
 	"fmt"
 	"github.com/Albert-Zhan/httpc"
+	"github.com/makiuchi-d/gozxing"
+	"github.com/makiuchi-d/gozxing/qrcode"
 	"github.com/tidwall/gjson"
 	"github.com/unknwon/goconfig"
 	"github.com/ztino/jd_seckill/common"
 	"github.com/ztino/jd_seckill/log"
+	"github.com/ztino/jd_seckill/service"
+	"image"
 	"net/http"
+	"net/url"
 	"os"
 	"path/filepath"
 	"strconv"
@@ -58,7 +63,25 @@ func (this *User) QrLogin() (string,error) {
 	}
 	log.Println("二维码获取成功，请打开京东APP扫描")
 	qrPath := filepath.Join(common.SoftDir, `./qr_code.png`)
-	common.OpenImage(qrPath)
+
+	qrcodeShowType := this.conf.MustValue("config", "qrcode_show_type", "open")
+	log.Debug("登录二维码展示方式：", qrcodeShowType)
+	if qrcodeShowType == "dingtalk" {
+		go func() {
+			file, _ := os.Open(qrPath)
+			defer file.Close()
+			img, _, _ := image.Decode(file)
+			bmp, _ := gozxing.NewBinaryBitmapFromImage(img)
+			qrReader := qrcode.NewQRCodeReader()
+			res, _ := qrReader.Decode(bmp, nil)
+			qrcodeCreateApi := this.conf.MustValue("config", "qrcode_create_api", "https://api.pwmqr.com/qrcode/create/?url=")
+			msg := fmt.Sprintf("二维码获取成功，请打开京东APP扫描\n\n![](%s%s)\n\n", qrcodeCreateApi, url.QueryEscape(res.String()))
+			_ = service.SendMessage(this.conf, "京东秒杀通知", msg)
+		}()
+	} else {
+		common.OpenImage(qrPath, qrcodeShowType)
+	}
+
 	return wlfstkSmdl,nil
 }
 

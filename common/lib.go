@@ -3,13 +3,14 @@ package common
 import (
 	"bytes"
 	"fmt"
-	"github.com/disintegration/imaging"
 	"github.com/makiuchi-d/gozxing"
 	"github.com/makiuchi-d/gozxing/qrcode"
+	"github.com/ztino/jd_seckill/log"
 	goQrcode "github.com/skip2/go-qrcode"
 	"golang.org/x/text/encoding/simplifiedchinese"
 	"golang.org/x/text/transform"
 	"image"
+	"image/color"
 	"io/ioutil"
 	"math/rand"
 	"os"
@@ -101,10 +102,31 @@ func Exists(path string) bool {
 	return true
 }
 
-func OpenImage(qrPath string) {
-	if runtime.GOOS == "windows" { //windows
-		cmd := exec.Command("cmd", "/c", "rundll32.exe", "C:\\Windows\\System32\\shimgvw.dll,ImageView_FullscreenA", qrPath)
+func OpenImage(qrPath, qrcodeShowType string) {
+	//解析原来的二维码
+	file, _ := os.Open(qrPath)
+	defer file.Close()
+	img, _, _ := image.Decode(file)
+	bmp, _ := gozxing.NewBinaryBitmapFromImage(img)
+	qrReader := qrcode.NewQRCodeReader()
+	res, _ := qrReader.Decode(bmp, nil)
+
+	//Windows与MacOS特殊处理
+	if qrcodeShowType != "print" && (runtime.GOOS == "windows" || runtime.GOOS == "darwin") {
+		//重新生成一个便于扫码
+		if err := goQrcode.WriteColorFile(res.String(), goQrcode.High, 512, color.White, color.Black, qrPath); err != nil {
+			log.Error("重新生成二维码失败：", err)
+		}
+
+		//打开图片
+		var cmd *exec.Cmd
+		if runtime.GOOS == "windows" {
+			cmd = exec.Command("cmd", "/c", "rundll32.exe", "C:\\Windows\\System32\\shimgvw.dll,ImageView_FullscreenA", qrPath)
+		} else {
+			cmd = exec.Command("open", qrPath)
+		}
 		_ = cmd.Start()
+
 		//扫码后二维码自动删除，自动关闭照片查看器
 		go func() {
 			for {
@@ -115,39 +137,12 @@ func OpenImage(qrPath string) {
 				}
 			}
 		}()
-	} else if runtime.GOOS == "darwin" { //Macos
-		QrWithBackground(qrPath)
-		cmd := exec.Command("open", qrPath)
-		_ = cmd.Start()
-		//扫码后二维码自动删除，自动关闭照片查看器
-		go func() {
-			for {
-				time.Sleep(time.Duration(1) * time.Second)
-				if !Exists(qrPath) {
-					_ = exec.Command("pkill","-f","Preview").Run()
-					break
-				}
-			}
-		}()
-	} else {
-		//linux或者其他系统
-		file, _ := os.Open(qrPath)
-		img, _, _ := image.Decode(file)
-		bmp, _ := gozxing.NewBinaryBitmapFromImage(img)
-		qrReader := qrcode.NewQRCodeReader()
-		res, _ := qrReader.Decode(bmp, nil)
-		//输出控制台
-		qr, _ := goQrcode.New(res.String(), goQrcode.High)
-		fmt.Println(qr.ToSmallString(false))
+		return
 	}
-}
 
-func QrWithBackground(path string) {
-	bg, _ := Asset("bg.png")
-	background, _ := imaging.Decode(bytes.NewReader(bg))
-	qr, _ := imaging.Open(path)
-	dst := imaging.Paste(background, qr, image.Pt(1555, 500))
-	imaging.Save(dst, path)
+	//Linux或其他系统，直接输出控制台
+	qr, _ := goQrcode.New(res.String(), goQrcode.High)
+	fmt.Println(qr.ToSmallString(false))
 }
 
 //指定位数随机数

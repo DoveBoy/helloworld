@@ -65,7 +65,6 @@ func init() {
 	if cfg, err := goconfig.LoadConfigFile(softDir+"/conf.ini"); err == nil {
 		lvl, _ = cfg.GetValue("config", "log_level")
 	}
-	fmt.Println(lvl)
 	atomicLevel := zap.NewAtomicLevel()
 	atomicLevel.SetLevel(getLoggerLevel(lvl))
 
