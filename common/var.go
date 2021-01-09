@@ -91,4 +91,6 @@ var (
 	Config *goconfig.ConfigFile
 
 	SeckillStatus chan bool
+
+	ViewQrcodePid = 0
 )
