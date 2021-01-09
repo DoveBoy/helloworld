@@ -10,7 +10,6 @@ require (
 	github.com/chromedp/chromedp v0.5.4
 	github.com/disintegration/imaging v1.6.2
 	github.com/gobwas/httphead v0.1.0 // indirect
-	github.com/gookit/color v1.3.6
 	github.com/json-iterator/go v1.1.10 // indirect
 	github.com/makiuchi-d/gozxing v0.0.0-20200903113411-25f730ed83da
 	github.com/natefinch/lumberjack v2.0.0+incompatible
