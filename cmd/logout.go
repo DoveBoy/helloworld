@@ -22,6 +22,6 @@ func startLogout(cmd *cobra.Command, args []string)  {
 		_=os.Remove(common.SoftDir+"/cookie.txt")
 		log.Println("退出成功")
 	}else{
-		log.Println("退出失败，未登录")
+		log.Error("退出失败，未登录")
 	}
 }

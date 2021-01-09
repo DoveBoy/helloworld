@@ -4,6 +4,7 @@ import (
 	"github.com/blinkbean/dingtalk"
 	"github.com/unknwon/goconfig"
 	"github.com/ztino/jd_seckill/log"
+	"regexp"
 )
 
 type Dingtalk struct {
@@ -24,13 +25,27 @@ func (this *Dingtalk) Send(title, msg string) error {
 		"---------",
 		msg,
 	}
-	log.Println("正在发送通知...")
-	err := cli.SendMarkDownMessageBySlice(title, markdown)
-	if err != nil {
-		log.Println(err)
+
+	var err error
+	at := this.conf.MustValue("dingtalk", "at", "none")
+
+	if at == "all" {
+		err = cli.SendMarkDownMessageBySlice(title, markdown, dingtalk.WithAtAll())
 	} else {
-		log.Println("钉钉机器人推送成功")
+		reg := regexp.MustCompile(`(\d{11})`)
+		mobiles := reg.FindAllString(at, 2)
+		if len(mobiles) > 0 {
+			err = cli.SendMarkDownMessageBySlice(title, markdown, dingtalk.WithAtMobiles(mobiles))
+		} else {
+			err = cli.SendMarkDownMessageBySlice(title, markdown)
+		}
 	}
 
+	if err != nil {
+		log.Error(err)
+		return err
+	}
+
+	log.Println("钉钉机器人推送成功")
 	return nil
 }

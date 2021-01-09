@@ -45,7 +45,7 @@ func (this *User) QrLogin() (string,error) {
 	req.SetHeader("Referer","https://passport.jd.com/new/login.aspx")
 	resp,err:=req.SetUrl("https://qr.m.jd.com/show?appid=133&size=300&t="+strconv.Itoa(int(time.Now().Unix()*1000))).SetMethod("get").Send().EndFile(common.SoftDir+"/","qr_code.png")
 	if err!=nil || resp.StatusCode!=http.StatusOK {
-		log.Println("获取二维码失败")
+		log.Error("获取二维码失败")
 		return "",errors.New("获取二维码失败")
 	}
 	cookies:=resp.Cookies()
@@ -71,9 +71,16 @@ func (this *User) QrcodeTicket(wlfstkSmdl string) (string,error) {
 		log.Println("获取二维码扫描结果异常")
 		return "",errors.New("获取二维码扫描结果异常")
 	}
-	if gjson.Get(body,"code").Int()!=200 {
-		log.Printf("Code: %s, Message: %s",gjson.Get(body,"code").String(),gjson.Get(body,"msg").String())
-		return "",errors.New(fmt.Sprintf("Code: %s, Message: %s",gjson.Get(body,"code").String(),gjson.Get(body,"msg").String()))
+	code := gjson.Get(body, "code").String()
+	msg := gjson.Get(body, "msg").String()
+	//如果二维码过期，直接结束
+	if code == "203" {
+		log.Errorf("Code: %s, Message: %s", code, msg)
+		os.Exit(0)
+
+	} else if code != "200" {
+		log.Warnf("Code: %s, Message: %s", code, msg)
+		return "", errors.New(fmt.Sprintf("Code: %s, Message: %s", code, msg))
 	}
 	log.Println("已完成手机客户端确认")
 	return gjson.Get(body,"ticket").String(),nil
@@ -86,14 +93,14 @@ func (this *User) TicketInfo(ticket string) (string,error) {
 	resp,body,err:=req.SetUrl("https://passport.jd.com/uc/qrCodeTicketValidation?t="+ticket).SetMethod("get").Send().End()
 	defer this.DelQrCode()
 	if err!=nil || resp.StatusCode!=http.StatusOK {
-		log.Println("二维码信息校验失败")
+		log.Error("二维码信息校验失败")
 		return "",errors.New("二维码信息校验失败")
 	}
 	if gjson.Get(body,"returnCode").Int()==0 {
-		log.Println("二维码信息校验成功")
+		log.Info("二维码信息校验成功")
 		return "",nil
 	}else{
-		log.Println("二维码信息校验失败")
+		log.Error("二维码信息校验失败")
 		return "",errors.New("二维码信息校验失败")
 	}
 }
