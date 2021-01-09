@@ -12,11 +12,9 @@ import (
 
 func init()  {
 	//软件目录获取
-	dir,err:=os.Getwd()
-	if err!=nil {
-		common.SoftDir="."
-	}else{
-		common.SoftDir=dir
+	common.SoftDir = "."
+	if dir, err := os.Getwd(); err == nil {
+		common.SoftDir = dir
 	}
 
 	//日志初始化
