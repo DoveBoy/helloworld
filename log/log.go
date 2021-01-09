@@ -54,10 +54,10 @@ func init() {
 		MessageKey:     "msg",
 		StacktraceKey:  "stacktrace",
 		LineEnding:     zapcore.DefaultLineEnding,
-		EncodeLevel:    zapcore.CapitalLevelEncoder,    // 大写编码器
-		EncodeTime:     zapcore.ISO8601TimeEncoder,     // ISO8601 UTC 时间格式
-		EncodeDuration: zapcore.SecondsDurationEncoder, // 时间精度？
-		EncodeCaller:   zapcore.ShortCallerEncoder,     // 短路径编码器
+		EncodeLevel:    zapcore.CapitalColorLevelEncoder,                       //控制台彩色日志输出
+		EncodeTime:     zapcore.TimeEncoderOfLayout("2006-01-02 15:04:05.000"), //时间格式
+		EncodeDuration: zapcore.SecondsDurationEncoder,                         // 时间精度？
+		EncodeCaller:   zapcore.ShortCallerEncoder,                             // 短路径编码器
 		EncodeName:     zapcore.FullNameEncoder,
 	}
 
@@ -75,13 +75,17 @@ func init() {
 		zapcore.NewMultiWriteSyncer(zapcore.AddSync(os.Stdout), zapcore.AddSync(&hook)), // 打印到控制台和文件
 		atomicLevel,                                                                     // 日志级别
 	)
-	// 开启开发模式，堆栈跟踪
-	caller := zap.AddCaller()
-	// 开启文件及行号
-	development := zap.AddCallerSkip(1)
 
-	logger := zap.New(core, caller, development)
-	myLogger = logger.Sugar()
+	//日志级别=debug时，
+	if lvl == "debug" {
+		caller := zap.AddCaller()           //开启开发模式，堆栈跟踪
+		development := zap.AddCallerSkip(1) //开启文件及行号
+		logger := zap.New(core, caller, development)
+		myLogger = logger.Sugar()
+	} else {
+		logger := zap.New(core)
+		myLogger = logger.Sugar()
+	}
 }
 
 //兼容 log.Println [INFO]级别
