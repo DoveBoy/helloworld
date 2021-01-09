@@ -22,10 +22,19 @@ import (
 type Seckill struct {
 	client *httpc.HttpClient
 	conf   *goconfig.ConfigFile
+	initInfo string
 }
 
 func NewSeckill(client *httpc.HttpClient, conf *goconfig.ConfigFile) *Seckill {
-	return &Seckill{client: client, conf: conf}
+	return &Seckill{client: client, conf: conf,initInfo: ""}
+}
+
+func (this *Seckill) SetInitInfo(initInfo string) {
+	this.initInfo=initInfo
+}
+
+func (this *Seckill) GetInitInfo() string {
+	return this.initInfo
 }
 
 func (this *Seckill) getUserAgent() string {
@@ -287,31 +296,35 @@ func (this *Seckill) SubmitSeckillOrder() bool {
 	skuId := this.conf.MustValue("config", "sku_id", "")
 	seckillNum := this.conf.MustValue("config", "seckill_num", "2")
 	paymentPwd := this.conf.MustValue("account", "payment_pwd", "")
-	initInfo, err := this.SeckillInitInfo()
-	if err != nil {
-		log.Error(fmt.Sprintf("抢购失败，无法获取生成订单的基本信息，接口返回:【%s】", err.Error()))
+	//如果提前获取秒杀初始化信息失败，提交订单时自动重试一次
+	if this.initInfo=="" {
+		initInfo, _ := this.SeckillInitInfo()
+		this.SetInitInfo(initInfo)
+	}
+	if this.initInfo=="" {
+		log.Error(fmt.Sprintf("抢购失败，无法获取生成订单的基本信息，接口返回:【%s】", this.initInfo))
 		return false
 	}
-	address := gjson.Get(initInfo, "addressList").Array()
-	if !gjson.Get(initInfo, "addressList").Exists() || len(address)<1 {
-		log.Error("抢购失败，返回信息:"+initInfo)
+	address := gjson.Get(this.initInfo, "addressList").Array()
+	if !gjson.Get(this.initInfo, "addressList").Exists() || len(address)<1 {
+		log.Error("抢购失败，返回信息:"+this.initInfo)
 		return false
 	}
 	defaultAddress := address[0]
-	isinvoiceInfo := gjson.Get(initInfo, "invoiceInfo").Exists()
+	isinvoiceInfo := gjson.Get(this.initInfo, "invoiceInfo").Exists()
 	invoiceTitle := "-1"
 	invoiceContentType := "-1"
 	invoicePhone := ""
 	invoicePhoneKey := ""
 	invoiceInfo := "false"
 	if isinvoiceInfo {
-		invoiceTitle = gjson.Get(initInfo, "invoiceInfo.invoiceTitle").String()
-		invoiceContentType = gjson.Get(initInfo, "invoiceInfo.invoiceContentType").String()
-		invoicePhone = gjson.Get(initInfo, "invoiceInfo.invoicePhone").String()
-		invoicePhoneKey = gjson.Get(initInfo, "invoiceInfo.invoicePhoneKey").String()
+		invoiceTitle = gjson.Get(this.initInfo, "invoiceInfo.invoiceTitle").String()
+		invoiceContentType = gjson.Get(this.initInfo, "invoiceInfo.invoiceContentType").String()
+		invoicePhone = gjson.Get(this.initInfo, "invoiceInfo.invoicePhone").String()
+		invoicePhoneKey = gjson.Get(this.initInfo, "invoiceInfo.invoicePhoneKey").String()
 		invoiceInfo = "true"
 	}
-	token := gjson.Get(initInfo, "token").String()
+	token := gjson.Get(this.initInfo, "token").String()
 	log.Info("提交抢购订单...")
 	req := httpc.NewRequest(this.client)
 	req.SetHeader("User-Agent", this.getUserAgent())

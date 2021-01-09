@@ -82,6 +82,11 @@ func startSeckill(cmd *cobra.Command, args []string) {
 			log.Warn("开始执行……")
 		}
 
+		//提前获取秒杀初始化信息，提高效率，待测试
+		log.Warn("提前获取秒杀初始化信息...")
+		initInfo,_:=seckill.SeckillInitInfo()
+		seckill.SetInitInfo(initInfo)
+
 		//开启抢购任务,第二个参数为开启几个协程
 		//怕封号的可以减少协程数量,相反抢到的成功率也减低了
 		//抢购任务数读取配置文件
