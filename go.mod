@@ -8,7 +8,6 @@ require (
 	github.com/blinkbean/dingtalk v0.0.0-20201231030509-45a553a84503
 	github.com/chromedp/cdproto v0.0.0-20201204063249-be40c824ad18
 	github.com/chromedp/chromedp v0.5.4
-	github.com/disintegration/imaging v1.6.2
 	github.com/gobwas/httphead v0.1.0 // indirect
 	github.com/json-iterator/go v1.1.10 // indirect
 	github.com/makiuchi-d/gozxing v0.0.0-20200903113411-25f730ed83da
