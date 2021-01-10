@@ -1,8 +1,6 @@
 helloworld
 =======
 
-### 不定时开放群链接：https://t.me/joinchat/GsDnhtkdKJ4nbwJh
-
 ## 特别声明:
 
 * 本仓库发布的`helloworld`项目中涉及的任何脚本，仅用于测试和学习研究，禁止用于商业用途，不能保证其合法性，准确性，完整性和有效性，请根据情况自行判断。
@@ -28,7 +26,7 @@ helloworld
 
 > ⚠ 此项目是[python jd_seckill](https://github.com/huanghyw/jd_seckill) 的go版本实现，旨在降低使用门槛和相互学习而创建。
 
-**go版本的jd_seckill，京东抢茅台神器，支持跨平台，使用者请在发布页下载可执行文件，欢迎pr。**
+**go版本的jd_seckill，支持跨平台，使用者请在发布页下载可执行文件，欢迎pr。**
 
 ## 支持系统
 
@@ -50,9 +48,6 @@ go get
 go get github.com/ztino/jd_seckill
 ```
 
-## 待办
-- 跨平台桌面端支持，打算使用：https://github.com/therecipe/qt
-
 ## 使用
 
 > [下载](https://github.com/ztino/jd_seckill/releases) 对应平台的可执行文件，解压，终端进入该目录。
@@ -66,8 +61,6 @@ jd_seckill login
 ### 自动获取eid,fp
 
 > ⚠依赖谷歌浏览器，请安装谷歌浏览器，windows下请将安装目录加入系统变量Path
-
-> ⚠ 京东可能在修改eid和fp的获取方式了，目前该功能获取不太稳定，请勿依赖该功能，目前观望中，不做更改
 
 执行以下命令按照提示操作:
 ```shell
