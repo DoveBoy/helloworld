@@ -37,12 +37,18 @@ func startJdTdudfp(cmd *cobra.Command, args []string) {
 		log.Warn("开始自动获取eid和fp，如遇卡住请结束进程，重新启动")
 		options := []chromedp.ExecAllocatorOption{
 			chromedp.Flag("headless", false),                       //debug使用
+			chromedp.Flag("mute-audio", true),                      //静音
 			chromedp.Flag("blink-settings", "imagesEnabled=false"), //禁用图片加载
 			chromedp.Flag("start-maximized", true),                 //最大化窗口
 			chromedp.Flag("no-sandbox", true),                      //禁用沙盒, 性能优先
-			chromedp.Flag("disable-setuid-sandbox", true),          //禁用setuid沙盒, 性能优先
 			chromedp.Flag("no-default-browser-check", true),        //不检查默认浏览器
-			chromedp.Flag("disable-plugins", true),                 //禁用扩展
+			chromedp.Flag("ignore-certificate-errors", true),       //忽略SSL证书错误
+			chromedp.Flag("disable-gpu", true),                     //禁用GPU加速
+			chromedp.Flag("no-first-run", true),                    //非首次运行
+			chromedp.Flag("disable-plugins", true),                 //禁用插件
+			chromedp.Flag("disable-extensions", false),             //禁用扩展
+			chromedp.Flag("disable-infobars", true),
+			chromedp.Flag("enable-automation", false),
 			chromedp.UserAgent(common.Config.MustValue("config", "default_user_agent", "")),
 		}
 		options = append(chromedp.DefaultExecAllocatorOptions[:], options...)

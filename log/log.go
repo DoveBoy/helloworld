@@ -36,7 +36,7 @@ func init() {
 		softDir = dir
 	}
 	fileName := fmt.Sprintf("%s/logs/jd_seckill_%s.log", softDir, time.Now().Format("20060102"))
-	fmt.Println("日志文件：", fileName)
+	fmt.Println("当前日志文件：", fileName)
 	hook := lumberjack.Logger{
 		Filename:   fileName, // 日志文件路径
 		MaxSize:    128,      // 每个日志文件保存的最大尺寸 单位：M
@@ -53,7 +53,7 @@ func init() {
 		MessageKey:     "msg",
 		StacktraceKey:  "stacktrace",
 		LineEnding:     zapcore.DefaultLineEnding,
-		EncodeLevel:    zapcore.CapitalColorLevelEncoder,                       //控制台彩色日志输出
+		EncodeLevel:    zapcore.CapitalLevelEncoder,                            //大写DEBUG等标签
 		EncodeTime:     zapcore.TimeEncoderOfLayout("2006-01-02 15:04:05.000"), //时间格式
 		EncodeDuration: zapcore.SecondsDurationEncoder,                         // 时间精度？
 		EncodeCaller:   zapcore.ShortCallerEncoder,                             // 短路径编码器

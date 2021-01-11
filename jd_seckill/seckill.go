@@ -54,7 +54,7 @@ func (this *Seckill) SkuTitle() (string, error) {
 	return strings.TrimSpace(doc.Find(".sku-name").Text()), nil
 }
 
-func (this *Seckill) GetDiffTime() int64 {
+func (this *Seckill) GetDiffTime() (int64, int64) {
 	log.Info("获取本地时间与京东云端时间差")
 	localTime := time.Now().UnixNano() / 1e6
 	log.Info("本地系统时间：", time.Unix(0, localTime*1e6))
@@ -75,7 +75,7 @@ func (this *Seckill) GetDiffTime() int64 {
 	diffTime := localTime - jdTime + delayTime/2
 	log.Info("实际时间误差：", diffTime, "ms (本地时间-京东云端时间+网络请求延时/2)")
 
-	return diffTime
+	return diffTime, delayTime
 }
 
 func (this *Seckill) GetWareBusiness() ([]string, []string, error) {
@@ -128,7 +128,7 @@ func (this *Seckill) GetWareBusiness() ([]string, []string, error) {
 func (this *Seckill) MakeReserve() {
 	yuyueTimeArr, buyTimeArr, err := this.GetWareBusiness()
 	if err == nil && len(yuyueTimeArr) == 2 {
-		diffTime := this.GetDiffTime()
+		diffTime, _ := this.GetDiffTime()
 		loc, _ := time.LoadLocation("Local")
 		yuyueTimeBegin, _ := time.ParseInLocation(common.DateTimeFormatStr, yuyueTimeArr[0]+":00", loc)
 		yuyueTimeEnd, _ := time.ParseInLocation(common.DateTimeFormatStr, yuyueTimeArr[1]+":59", loc)
@@ -153,7 +153,7 @@ func (this *Seckill) MakeReserve() {
 
 	user := NewUser(this.client, this.conf)
 	userInfo, _ := user.GetUserInfo()
-	log.Debug("用户:" + userInfo)
+	log.Info("用户:" + userInfo)
 	shopTitle, err := this.SkuTitle()
 	if err != nil {
 		log.Error("获取商品信息失败")
@@ -278,7 +278,7 @@ func (this *Seckill) SeckillInitInfo() (string, error) {
 	for errorCount > 0 {
 		_, body, _ := req.Send().End()
 		if body!="null" && gjson.Valid(body) {
-			log.Warn("获取秒杀初始化信息成功")
+			log.Warn("获取秒杀初始化信息成功,返回信息:" + body)
 			return body,nil
 		}else{
 			log.Error("获取秒杀初始化信息失败,返回信息:"+body)
@@ -307,7 +307,7 @@ func (this *Seckill) SubmitSeckillOrder() bool {
 	}
 	address := gjson.Get(this.initInfo, "addressList").Array()
 	if !gjson.Get(this.initInfo, "addressList").Exists() || len(address)<1 {
-		log.Error("抢购失败，返回信息:"+this.initInfo)
+		log.Error("抢购失败，解析收货地址失败，初始化信息:" + this.initInfo)
 		return false
 	}
 	defaultAddress := address[0]
@@ -366,13 +366,21 @@ func (this *Seckill) SubmitSeckillOrder() bool {
 	resp, body, err := req.SetUrl("https://marathon.jd.com/seckillnew/orderService/pc/submitOrder.action?skuId=" + skuId).SetMethod("post").Send().End()
 	if err != nil || resp.StatusCode != http.StatusOK {
 		log.Error("抢购失败，网络错误")
-		_ = service.SendMessage(this.conf, "京东秒杀通知", "抢购失败，网络错误")
+		//_ = service.SendMessage(this.conf, "京东秒杀通知", "抢购失败，网络错误")
 		return false
 	}
 
 	if !gjson.Valid(body) {
-		log.Error("抢购失败，返回信息:" + body)
-		_ = service.SendMessage(this.conf, "京东秒杀通知", "抢购失败，返回信息:"+body)
+		log.Debug(body)
+		//尝试解析html中的错误信息
+		html := strings.NewReader(body)
+		if doc, err := goquery.NewDocumentFromReader(html); err == nil {
+			errorMsg := strings.TrimSpace(doc.Find(".error-msg").Text())
+			log.Error("抢购失败，返回异常信息:", errorMsg)
+		} else {
+			log.Error("抢购失败，返回异常信息")
+		}
+		//_ = service.SendMessage(this.conf, "京东秒杀通知", "抢购失败，返回信息:"+body)
 		return false
 	}
 	if gjson.Get(body, "success").Bool() {
@@ -384,7 +392,7 @@ func (this *Seckill) SubmitSeckillOrder() bool {
 		return true
 	} else {
 		log.Error("抢购失败，返回信息:" + body)
-		_ = service.SendMessage(this.conf, "京东秒杀通知", "抢购失败，返回信息:"+body)
+		//_ = service.SendMessage(this.conf, "京东秒杀通知", "抢购失败，返回信息:"+body)
 		return false
 	}
 }
