@@ -7,6 +7,7 @@ import (
 	"go.uber.org/zap"
 	"go.uber.org/zap/zapcore"
 	"os"
+	"runtime"
 	"time"
 )
 
@@ -53,11 +54,16 @@ func init() {
 		MessageKey:     "msg",
 		StacktraceKey:  "stacktrace",
 		LineEnding:     zapcore.DefaultLineEnding,
-		EncodeLevel:    zapcore.CapitalLevelEncoder,                            //大写DEBUG等标签
+		EncodeLevel:    zapcore.CapitalColorLevelEncoder,                            //控制台彩色日志输出
 		EncodeTime:     zapcore.TimeEncoderOfLayout("2006-01-02 15:04:05.000"), //时间格式
 		EncodeDuration: zapcore.SecondsDurationEncoder,                         // 时间精度？
 		EncodeCaller:   zapcore.ShortCallerEncoder,                             // 短路径编码器
 		EncodeName:     zapcore.FullNameEncoder,
+	}
+
+	//windows下大写DEBUG等标签展示
+	if runtime.GOOS=="windows" {
+		encoderConfig.EncodeLevel=zapcore.CapitalLevelEncoder
 	}
 
 	// 设置日志级别
