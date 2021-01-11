@@ -7,7 +7,7 @@ import (
 
 const (
 	SoftName          = "jd_seckill"
-	Version           = "0.2.4"
+	Version           = "0.2.6"
 	DateTimeFormatStr = "2006-01-02 15:04:05"
 	DateFormatStr     = "2006-01-02"
 	IniFileContent    = `#默认配置
@@ -30,11 +30,11 @@ seckill_num = 2
 # 抢购开始时间设定 2021-01-01 09:59:59 (PS.预约成功后会自动更新)
 buy_time = 2021-01-01 09:59:59
 # 抢购总时间，单位:分钟，默认两分钟
-seckill_time =
-# 抢购任务数量，默认5个
+seckill_time = 5
+# 抢购任务数量，默认5个（PS.每次发起抢购的线程数量）
 task_num =
-# 每次抢购间隔时间，单位:毫秒，默认1500毫秒，每1000毫秒等于1秒
-ticker_time =
+# 每次抢购最小间隔时间，单位:毫秒，默认1500毫秒，1000毫秒=1秒；最大间隔为2倍，默认3000毫秒（PS.怕封号的可以增加间隔时间,相反抢到的成功率也减低了）
+ticker_time = 500
 # 默认UA
 default_user_agent = Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_3) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/80.0.3987.132 Safari/537.36
 
