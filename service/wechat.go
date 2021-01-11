@@ -23,7 +23,7 @@ func (this *Wechat) Send(title,msg string) error {
 	url:=fmt.Sprintf("http://sc.ftqq.com/%s.send",this.conf.MustValue("messenger","server_chan_sckey",""))
 	req.SetHeader("User-Agent","Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_3) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/80.0.3987.132 Safari/537.36")
 	log.Warn("正在发送通知...")
-	_,body,_:=req.SetUrl(url+"?text="+title+"&desp="+msg).SetMethod("get").Send().End()
+	_,body,_:=req.SetUrl(url).SetMethod("post").SetData("text", title).SetData("desp", msg).Send().End()
 	if gjson.Get(body,"errno").Int()!=0 {
 		log.Error("微信推送失败，返回错误:"+gjson.Get(body,"errmsg").String())
 		return errors.New("微信推送失败，返回错误:"+gjson.Get(body,"errmsg").String())
