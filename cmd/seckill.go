@@ -65,10 +65,10 @@ func startSeckill(cmd *cobra.Command, args []string) {
 			buyTime := t.UnixNano()/1e6 + diffTime
 
 			//抢购总时间读取配置文件
-			str := common.Config.MustValue("config", "seckill_time", "2")
+			str := common.Config.MustValue("config", "seckill_time", "5")
 			seckillTime, err := strconv.Atoi(str)
 			if err != nil {
-				seckillTime = 2
+				seckillTime = 5
 			}
 
 			timerTime := buyTime - time.Now().UnixNano()/1e6 - delayTime //减去网络请求延时时间(1次)，用于提前获取秒杀初始化信息
