@@ -102,7 +102,7 @@ func startSeckill(cmd *cobra.Command, args []string) {
 
 func Start(seckill *jd_seckill.Seckill,taskNum int)  {
 	//抢购总时间读取配置文件
-	str:=common.Config.MustValue("config","seckill_time","2")
+	str:=common.Config.MustValue("config","seckill_time","5")
 	seckillTime,_:=strconv.Atoi(str)
 	seckillTotalTime:=time.Now().Add(time.Duration(seckillTime)*time.Minute).Unix()
 	//抢购间隔时间读取配置文件
